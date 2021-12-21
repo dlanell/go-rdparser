@@ -40,8 +40,12 @@ func TestGetNextToken(t *testing.T) {
 				tokenizerText: "abc",
 				expectation: nil,
 			},
+			"given non numeric characters before number": {
+				tokenizerText: "a1",
+				expectation: nil,
+			},
 			"given non numeric characters after number": {
-				tokenizerText: "1abc",
+				tokenizerText: "1a",
 				expectation: &Token{
 					TokenType: NumberToken,
 					Value:     "1",

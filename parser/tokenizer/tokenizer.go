@@ -1,6 +1,8 @@
 package tokenizer
 
-import "strconv"
+import (
+	"regexp"
+)
 
 type Tokenizer struct {
 	text   string
@@ -41,46 +43,26 @@ func (t *Tokenizer) GetNextToken() *Token {
 	if !t.hasMoreTokens() {
 		return nil
 	}
-	characters := []rune(t.text)[t.cursor:]
 
-	if _, charErr := strconv.Atoi(string(characters[0])); charErr == nil {
-		tokenText := ""
+	characters := []byte(t.text)[t.cursor:]
 
-		for ok := true; ok; ok = charErr == nil && t.hasMoreTokens() {
-			tokenText += string(characters[t.cursor])
-			t.cursor++
-			if !t.hasMoreTokens() {
-				break
-			}
-			_, charErr = strconv.Atoi(string(characters[t.cursor]))
-		}
-		return &Token{TokenType: NumberToken, Value: tokenText}
+	numberRegex := regexp.MustCompile(`^\d+`)
+	if matchedToken := numberRegex.FindString(string(characters)); matchedToken != "" {
+		t.cursor += len(matchedToken)
+		return &Token{TokenType: NumberToken, Value: matchedToken}
 	}
 
-	if string(characters[0]) == `"` {
-		tokenText := ``
-
-		for ok := true; ok; ok = string(characters[t.cursor]) != `"` && !t.isEOF() {
-			tokenText += string(characters[t.cursor])
-			t.cursor++
-		}
-		tokenText += string(characters[t.cursor])
-		t.cursor++
-
-		return &Token{TokenType: StringToken, Value: tokenText}
+	doubleQuoteStringRegex := regexp.MustCompile(`^"[^"]*"`)
+	if matchedToken := doubleQuoteStringRegex.FindString(string(characters)); matchedToken != ""{
+		t.cursor += len(matchedToken)
+		return &Token{TokenType: StringToken, Value: matchedToken}
 	}
 
-	if string(characters[0]) == `'` {
-		tokenText := ``
-
-		for ok := true; ok; ok = string(characters[t.cursor]) != `'` && !t.isEOF() {
-			tokenText += string(characters[t.cursor])
-			t.cursor++
-		}
-		tokenText += string(characters[t.cursor])
-		t.cursor++
-
-		return &Token{TokenType: StringToken, Value: tokenText}
+	singleQuoteStringRegex := regexp.MustCompile(`^'[^']*'`)
+	if matchedToken := singleQuoteStringRegex.FindString(string(characters)); matchedToken != ""{
+		t.cursor += len(matchedToken)
+		return &Token{TokenType: StringToken, Value: matchedToken}
 	}
+
 	return nil
 }
