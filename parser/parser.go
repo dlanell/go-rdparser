@@ -43,7 +43,11 @@ func New(props Props) *Parser {
 }
 
 func (p *Parser) Run() (*Program, error) {
-	p.lookAhead = p.tokenizer.GetNextToken()
+	token, err := p.tokenizer.GetNextToken()
+	if err != nil {
+		return nil, err
+	}
+	p.lookAhead = token
 
 	return p.Program()
 }
@@ -120,7 +124,8 @@ func (p *Parser) eat(tokenType string) (*tokenizer.Token, error) {
 		return nil, fmt.Errorf("Unexpected token: %s, expected: %s\n", token.Value, tokenType)
 	}
 
-	p.lookAhead = p.tokenizer.GetNextToken()
+	nextToken, _ := p.tokenizer.GetNextToken()
+	p.lookAhead = nextToken
 
 	return token, nil
 }

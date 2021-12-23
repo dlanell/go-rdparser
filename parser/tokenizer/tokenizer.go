@@ -1,6 +1,8 @@
 package tokenizer
 
 import (
+	"errors"
+	"fmt"
 	"regexp"
 )
 
@@ -20,7 +22,8 @@ type Token struct {
 
 const (
 	NumberToken string = "NUMBER"
-	StringToken        = "STRING"
+	StringToken = "STRING"
+	SkipToken   = ""
 )
 
 func New(props Props) *Tokenizer {
@@ -39,30 +42,50 @@ func (t *Tokenizer) isEOF() bool {
 	return t.cursor == len(t.text)
 }
 
-func (t *Tokenizer) GetNextToken() *Token {
+type Spec map[*regexp.Regexp]string
+
+var spec = Spec{
+	// Whitespace
+	regexp.MustCompile(`^\s+`): SkipToken,
+	// Comment
+	regexp.MustCompile(`^//.*`): SkipToken,
+	regexp.MustCompile(`^/\*[\s\S]*?\*/`): SkipToken,
+	// Number
+	regexp.MustCompile(`^\d+`): NumberToken,
+	// String
+	regexp.MustCompile(`^"[^"]*"`): StringToken,
+	regexp.MustCompile(`^'[^']*'`): StringToken,
+}
+
+func (t *Tokenizer) GetNextToken() (*Token, error) {
 	if !t.hasMoreTokens() {
-		return nil
+		return nil, errors.New("no tokens present")
 	}
 
 	characters := []byte(t.text)[t.cursor:]
 
-	numberRegex := regexp.MustCompile(`^\d+`)
-	if matchedToken := numberRegex.FindString(string(characters)); matchedToken != "" {
-		t.cursor += len(matchedToken)
-		return &Token{TokenType: NumberToken, Value: matchedToken}
+	for regex, tokenType := range spec {
+		tokenValue := t.match(regex, string(characters))
+
+		if tokenValue == "" {
+			continue
+		}
+
+		if tokenType == SkipToken {
+			return t.GetNextToken()
+		}
+
+		return &Token{TokenType: tokenType, Value: tokenValue}, nil
 	}
 
-	doubleQuoteStringRegex := regexp.MustCompile(`^"[^"]*"`)
-	if matchedToken := doubleQuoteStringRegex.FindString(string(characters)); matchedToken != ""{
-		t.cursor += len(matchedToken)
-		return &Token{TokenType: StringToken, Value: matchedToken}
-	}
+	return nil, fmt.Errorf(`unexpected token: %s`, string(characters[0]))
+}
 
-	singleQuoteStringRegex := regexp.MustCompile(`^'[^']*'`)
-	if matchedToken := singleQuoteStringRegex.FindString(string(characters)); matchedToken != ""{
-		t.cursor += len(matchedToken)
-		return &Token{TokenType: StringToken, Value: matchedToken}
+func (t *Tokenizer) match(regex *regexp.Regexp, text string) string {
+	matchedToken := regex.FindString(text)
+	if matchedToken == "" {
+		return matchedToken
 	}
-
-	return nil
+	t.cursor += len(matchedToken)
+	return matchedToken
 }
