@@ -19,9 +19,9 @@ func TestNew(t *testing.T) {
 }
 
 type test struct {
-	tokenizerText string
-	expectedNode  *Program
-	expectedError error
+	tokenizerText   string
+	expectedProgram *Program
+	expectedError   error
 }
 
 func TestRun(t *testing.T) {
@@ -30,7 +30,7 @@ func TestRun(t *testing.T) {
 			tests := map[string]test{
 				"given numbers": {
 					tokenizerText: `123;`,
-					expectedNode: &Program{
+					expectedProgram: &Program{
 						nodeType: ProgramEnum,
 						body: []*Node{{
 							nodeType: ExpressionStatement,
@@ -48,7 +48,7 @@ func TestRun(t *testing.T) {
 				t.Run(name, func(t *testing.T) {
 					parser := New(Props{Text: tc.tokenizerText})
 					node, err := parser.Run()
-					assert.Equal(t, tc.expectedNode, node)
+					assert.Equal(t, tc.expectedProgram, node)
 					assert.Equal(t, tc.expectedError, err)
 				})
 			}
@@ -57,7 +57,7 @@ func TestRun(t *testing.T) {
 			tests := map[string]test{
 				"given double quote string": {
 					tokenizerText: `"sith";`,
-					expectedNode: &Program{
+					expectedProgram: &Program{
 						nodeType: ProgramEnum,
 						body: []*Node{{
 							nodeType: ExpressionStatement,
@@ -71,7 +71,7 @@ func TestRun(t *testing.T) {
 				},
 				"given single quote string": {
 					tokenizerText: `'sith';`,
-					expectedNode: &Program{
+					expectedProgram: &Program{
 						nodeType: ProgramEnum,
 						body: []*Node{{
 							nodeType: ExpressionStatement,
@@ -90,7 +90,7 @@ func TestRun(t *testing.T) {
 				t.Run(name, func(t *testing.T) {
 					parser := New(Props{Text: tc.tokenizerText})
 					node, err := parser.Run()
-					assert.Equal(t, tc.expectedNode, node)
+					assert.Equal(t, tc.expectedProgram, node)
 					assert.Equal(t, tc.expectedError, err)
 				})
 			}
@@ -102,7 +102,7 @@ func TestRun(t *testing.T) {
 'sith';
 42;
 `,
-					expectedNode: &Program{
+					expectedProgram: &Program{
 						nodeType: ProgramEnum,
 						body: []*Node{
 							{
@@ -132,7 +132,7 @@ func TestRun(t *testing.T) {
 				t.Run(name, func(t *testing.T) {
 					parser := New(Props{Text: tc.tokenizerText})
 					node, err := parser.Run()
-					assert.Equal(t, tc.expectedNode, node)
+					assert.Equal(t, tc.expectedProgram, node)
 					assert.Equal(t, tc.expectedError, err)
 				})
 			}
@@ -146,7 +146,7 @@ func TestRun(t *testing.T) {
   42;
 }
 `,
-					expectedNode: &Program{
+					expectedProgram: &Program{
 						nodeType: ProgramEnum,
 						body: []*Node{
 							{
@@ -180,7 +180,7 @@ func TestRun(t *testing.T) {
   }
 }
 `,
-					expectedNode: &Program{
+					expectedProgram: &Program{
 						nodeType: ProgramEnum,
 						body: []*Node{
 							{
@@ -210,7 +210,7 @@ func TestRun(t *testing.T) {
 				},
 				"given block statement without expressions": {
 					tokenizerText: `{}`,
-					expectedNode: &Program{
+					expectedProgram: &Program{
 						nodeType: ProgramEnum,
 						body: []*Node{
 							{
@@ -226,7 +226,7 @@ func TestRun(t *testing.T) {
 				t.Run(name, func(t *testing.T) {
 					parser := New(Props{Text: tc.tokenizerText})
 					node, err := parser.Run()
-					assert.Equal(t, tc.expectedNode, node)
+					assert.Equal(t, tc.expectedProgram, node)
 					assert.Equal(t, tc.expectedError, err)
 				})
 			}
@@ -235,7 +235,7 @@ func TestRun(t *testing.T) {
 			tests := map[string]test{
 				"given empty statement": {
 					tokenizerText: `;`,
-					expectedNode: &Program{
+					expectedProgram: &Program{
 						nodeType: ProgramEnum,
 						body: []*Node{
 							{
@@ -251,7 +251,7 @@ func TestRun(t *testing.T) {
 				t.Run(name, func(t *testing.T) {
 					parser := New(Props{Text: tc.tokenizerText})
 					node, err := parser.Run()
-					assert.Equal(t, tc.expectedNode, node)
+					assert.Equal(t, tc.expectedProgram, node)
 					assert.Equal(t, tc.expectedError, err)
 				})
 			}
