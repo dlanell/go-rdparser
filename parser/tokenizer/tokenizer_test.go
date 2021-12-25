@@ -25,6 +25,26 @@ type test struct {
 }
 
 func TestGetNextToken(t *testing.T) {
+	t.Run("Semicolon", func(t *testing.T) {
+		tests := map[string]test{
+			"given ;": {
+				tokenizerText: `;`,
+				expectedToken: &Token{
+					TokenType: SemiColonToken,
+					Value:     ";",
+				},
+			},
+		}
+
+		for name, tc := range tests {
+			t.Run(name, func(t *testing.T) {
+				tokenizer := New(Props{Text: tc.tokenizerText})
+				token, err := tokenizer.GetNextToken()
+				assert.Equal(t, tc.expectedToken, token)
+				assert.Equal(t, tc.expectedError, err)
+			})
+		}
+	})
 	t.Run("Comment", func(t *testing.T) {
 		tests := map[string]test{
 			"given number after single line comment": {

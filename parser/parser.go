@@ -20,18 +20,27 @@ type Props struct {
 
 type Program struct {
 	nodeType string
-	body     interface{}
+	body []*Node
 }
 
 type Node struct {
 	nodeType string
-	value    interface{}
+	body     interface{}
+}
+
+type StringLiteralValue struct {
+	value string
+}
+
+type NumericLiteralValue struct {
+	value int
 }
 
 const (
-	NumericLiteral string = "NUMERIC_LITERAL"
-	StringLiteral  = "STRING_LITERAL"
-	ProgramEnum     = "PROGRAM"
+	NumericLiteral string = "NumericLiteral"
+	StringLiteral  = "StringLiteral"
+	ExpressionStatement  = "ExpressionStatement"
+	ProgramEnum     = "Program"
 )
 
 func New(props Props) *Parser {
@@ -56,18 +65,73 @@ func (p *Parser) Run() (*Program, error) {
 // Main entry point
 //
 // Program
-//	: Literal
+//	: StatementList
 //	;
 ///*
 func (p *Parser) Program() (*Program, error) {
-	numericLiteral, err := p.Literal()
+	statements, err := p.StatementList()
 	if err != nil {
 		return nil, err
 	}
 	return &Program{
 		nodeType: ProgramEnum,
-		body: numericLiteral,
+		body: statements,
 	}, nil
+}
+
+// StatementList
+//	: Statement
+//	| Statement StatementList
+///*
+func (p *Parser) StatementList() ([]*Node, error) {
+	statements := make([]*Node, 0)
+	var statement, err = p.Statement()
+	if err != nil {
+		return nil, errors.New("literal: unexpected literal production")
+	}
+	statements = append(statements, statement)
+	for p.lookAhead != nil {
+		statement, err = p.Statement()
+		if err != nil {
+			return nil, errors.New("literal: unexpected literal production")
+		}
+		statements = append(statements, statement)
+	}
+	return statements, nil
+}
+
+// Statement
+//	: ExpressionStatement
+///*
+func (p *Parser) Statement() (*Node, error) {
+	expressionStatement, err := p.ExpressionStatement()
+	if err != nil {
+		return nil, errors.New("literal: unexpected literal production")
+	}
+	return expressionStatement, nil
+}
+
+// ExpressionStatement
+//	: Expression ';'
+///*
+func (p *Parser) ExpressionStatement() (*Node, error) {
+	expression, err := p.Expression()
+	if err != nil {
+		return nil, errors.New("literal: unexpected literal production")
+	}
+	_, err = p.eat(";")
+	if err != nil {
+		return nil, errors.New("literal: unexpected literal production")
+	}
+
+	return &Node{nodeType: ExpressionStatement, body: expression}, nil
+}
+
+// Expression
+//	: Literal
+///*
+func (p *Parser) Expression() (*Node, error) {
+	return p.Literal()
 }
 
 // Literal
@@ -98,7 +162,7 @@ func (p *Parser) NumericLiteral() (*Node, error) {
 		return nil, errors.New("invalid number token")
 	}
 
-	return &Node{nodeType: NumericLiteral, value: num}, nil
+	return &Node{nodeType: NumericLiteral, body: &NumericLiteralValue{value: num}}, nil
 }
 
 // StringLiteral
@@ -110,8 +174,7 @@ func (p *Parser) StringLiteral() (*Node, error) {
 		return nil, tokenErr
 	}
 
-
-	return &Node{nodeType: StringLiteral, value: token.Value[1:len(token.Value)-1]}, nil
+	return &Node{nodeType: StringLiteral, body: &StringLiteralValue{token.Value[1 : len(token.Value)-1]}}, nil
 }
 
 func (p *Parser) eat(tokenType string) (*tokenizer.Token, error) {

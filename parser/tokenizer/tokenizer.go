@@ -23,6 +23,7 @@ type Token struct {
 const (
 	NumberToken string = "NUMBER"
 	StringToken = "STRING"
+	SemiColonToken   = ";"
 	SkipToken   = ""
 )
 
@@ -45,14 +46,33 @@ func (t *Tokenizer) isEOF() bool {
 type Spec map[*regexp.Regexp]string
 
 var spec = Spec{
+	//---------------------------------------------------
 	// Whitespace
+
 	regexp.MustCompile(`^\s+`): SkipToken,
-	// Comment
+
+	//---------------------------------------------------
+	// Comments
+
+	// skip single-line comment
 	regexp.MustCompile(`^//.*`): SkipToken,
+	// skip multi-line comment
 	regexp.MustCompile(`^/\*[\s\S]*?\*/`): SkipToken,
-	// Number
+
+	//---------------------------------------------------
+	// Symbols, Delimeters
+
+	// semi colon
+	regexp.MustCompile(`^;`): SemiColonToken,
+
+	//---------------------------------------------------
+	// Numbers
+
 	regexp.MustCompile(`^\d+`): NumberToken,
-	// String
+
+	//---------------------------------------------------
+	// Strings
+
 	regexp.MustCompile(`^"[^"]*"`): StringToken,
 	regexp.MustCompile(`^'[^']*'`): StringToken,
 }
@@ -66,15 +86,12 @@ func (t *Tokenizer) GetNextToken() (*Token, error) {
 
 	for regex, tokenType := range spec {
 		tokenValue := t.match(regex, string(characters))
-
 		if tokenValue == "" {
 			continue
 		}
-
 		if tokenType == SkipToken {
 			return t.GetNextToken()
 		}
-
 		return &Token{TokenType: tokenType, Value: tokenValue}, nil
 	}
 

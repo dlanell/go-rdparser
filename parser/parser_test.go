@@ -28,32 +28,74 @@ func TestRun(t *testing.T) {
 	t.Run("Program", func(t *testing.T) {
 		tests := map[string]test{
 			"given numbers": {
-				tokenizerText: "123",
+				tokenizerText: `123;`,
 				expectedNode: &Program{
 					nodeType: ProgramEnum,
-					body: &Node{
-						nodeType: NumericLiteral,
-						value:    123,
-					},
+					body: []*Node{{
+						nodeType: ExpressionStatement,
+						body: &Node{
+							nodeType: NumericLiteral,
+							body: &NumericLiteralValue{
+								value: 123,
+							}},
+					}},
 				},
 			},
 			"given double quote string": {
-				tokenizerText: `"sith"`,
+				tokenizerText: `"sith";`,
 				expectedNode: &Program{
 					nodeType: ProgramEnum,
-					body: &Node{
-						nodeType: StringLiteral,
-						value:    "sith",
-					},
+					body: []*Node{{
+						nodeType: ExpressionStatement,
+						body: &Node{
+							nodeType: StringLiteral,
+							body: &StringLiteralValue{
+								value: "sith",
+							}},
+					}},
 				},
 			},
 			"given single quote string": {
-				tokenizerText: `'sith'`,
+				tokenizerText: `'sith';`,
 				expectedNode: &Program{
 					nodeType: ProgramEnum,
-					body: &Node{
-						nodeType: StringLiteral,
-						value:    "sith",
+					body: []*Node{{
+						nodeType: ExpressionStatement,
+						body: &Node{
+							nodeType: StringLiteral,
+							body: &StringLiteralValue{
+								value: "sith",
+							},
+						},
+					}},
+				},
+			},
+			"given string and numeric expression": {
+				tokenizerText: `
+'sith';
+42;
+`,
+				expectedNode: &Program{
+					nodeType: ProgramEnum,
+					body: []*Node{
+						{
+							nodeType: ExpressionStatement,
+							body: &Node{
+								nodeType: StringLiteral,
+								body: &StringLiteralValue{
+									value: "sith",
+								},
+							},
+						},
+						{
+							nodeType: ExpressionStatement,
+							body: &Node{
+								nodeType: NumericLiteral,
+								body: &NumericLiteralValue{
+									value: 42,
+								},
+							},
+						},
 					},
 				},
 			},
