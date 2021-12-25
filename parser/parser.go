@@ -41,6 +41,7 @@ const (
 	StringLiteral  = "StringLiteral"
 	ExpressionStatement  = "ExpressionStatement"
 	BlockStatement  = "BlockStatement"
+	EmptyStatement  = "EmptyStatement"
 	ProgramEnum     = "Program"
 )
 
@@ -107,19 +108,25 @@ func (p *Parser) StatementList(stopLookAhead string) ([]*Node, error) {
 ///*
 func (p *Parser) Statement() (*Node, error) {
 	switch p.lookAhead.TokenType {
+	case tokenizer.SemiColonToken:
+		return p.EmptyStatement()
 	case tokenizer.OpenCurlyBrace:
-		blockStatement, err := p.BlockStatement()
-		if err != nil {
-			return nil, err
-		}
-		return blockStatement, nil
+		return p.BlockStatement()
 	default:
-		expressionStatement, err := p.ExpressionStatement()
-		if err != nil {
-			return nil, err
-		}
-		return expressionStatement, nil
+		return p.ExpressionStatement()
 	}
+}
+
+// EmptyStatement
+//	: ';'
+///*
+func (p *Parser) EmptyStatement() (*Node, error) {
+	_, err := p.eat(";")
+	if err != nil {
+		return nil, err
+	}
+
+	return &Node{nodeType: EmptyStatement, body: nil}, nil
 }
 
 // BlockStatement

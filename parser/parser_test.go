@@ -171,6 +171,43 @@ func TestRun(t *testing.T) {
 						},
 					},
 				},
+				"given nested block statements with expressions": {
+					tokenizerText: `
+{
+  'sith';
+  {
+	42;
+  }
+}
+`,
+					expectedNode: &Program{
+						nodeType: ProgramEnum,
+						body: []*Node{
+							{
+								nodeType: BlockStatement,
+								body: []*Node{
+									{
+										nodeType: ExpressionStatement,
+										body: &Node{
+											nodeType: StringLiteral,
+											body:     &StringLiteralValue{"sith"},
+										},
+									},
+									{
+										nodeType: BlockStatement,
+										body: []*Node{{
+											nodeType: ExpressionStatement,
+											body:     &Node{
+												nodeType: NumericLiteral,
+												body: &NumericLiteralValue{42},
+											},
+										}},
+									},
+								},
+							},
+						},
+					},
+				},
 				"given block statement without expressions": {
 					tokenizerText: `{}`,
 					expectedNode: &Program{
@@ -179,6 +216,31 @@ func TestRun(t *testing.T) {
 							{
 								nodeType: BlockStatement,
 								body: []*Node{},
+							},
+						},
+					},
+				},
+			}
+
+			for name, tc := range tests {
+				t.Run(name, func(t *testing.T) {
+					parser := New(Props{Text: tc.tokenizerText})
+					node, err := parser.Run()
+					assert.Equal(t, tc.expectedNode, node)
+					assert.Equal(t, tc.expectedError, err)
+				})
+			}
+		})
+		t.Run("EmptyStatement", func(t *testing.T) {
+			tests := map[string]test{
+				"given empty statement": {
+					tokenizerText: `;`,
+					expectedNode: &Program{
+						nodeType: ProgramEnum,
+						body: []*Node{
+							{
+								nodeType: EmptyStatement,
+								body: nil,
 							},
 						},
 					},
