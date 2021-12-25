@@ -25,13 +25,27 @@ type test struct {
 }
 
 func TestGetNextToken(t *testing.T) {
-	t.Run("Semicolon", func(t *testing.T) {
+	t.Run("Symbols & Delimeters", func(t *testing.T) {
 		tests := map[string]test{
 			"given ;": {
 				tokenizerText: `;`,
 				expectedToken: &Token{
 					TokenType: SemiColonToken,
 					Value:     ";",
+				},
+			},
+			"given {": {
+				tokenizerText: `{`,
+				expectedToken: &Token{
+					TokenType: OpenCurlyBrace,
+					Value:     "{",
+				},
+			},
+			"given }": {
+				tokenizerText: `}`,
+				expectedToken: &Token{
+					TokenType: CloseCurlyBrace,
+					Value:     "}",
 				},
 			},
 		}

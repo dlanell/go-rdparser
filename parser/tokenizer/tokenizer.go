@@ -24,6 +24,8 @@ const (
 	NumberToken string = "NUMBER"
 	StringToken = "STRING"
 	SemiColonToken   = ";"
+	OpenCurlyBrace   = "{"
+	CloseCurlyBrace   = "}"
 	SkipToken   = ""
 )
 
@@ -62,8 +64,9 @@ var spec = Spec{
 	//---------------------------------------------------
 	// Symbols, Delimeters
 
-	// semi colon
 	regexp.MustCompile(`^;`): SemiColonToken,
+	regexp.MustCompile(`^{`): OpenCurlyBrace,
+	regexp.MustCompile(`^}`): CloseCurlyBrace,
 
 	//---------------------------------------------------
 	// Numbers

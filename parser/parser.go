@@ -40,6 +40,7 @@ const (
 	NumericLiteral string = "NumericLiteral"
 	StringLiteral  = "StringLiteral"
 	ExpressionStatement  = "ExpressionStatement"
+	BlockStatement  = "BlockStatement"
 	ProgramEnum     = "Program"
 )
 
@@ -69,7 +70,7 @@ func (p *Parser) Run() (*Program, error) {
 //	;
 ///*
 func (p *Parser) Program() (*Program, error) {
-	statements, err := p.StatementList()
+	statements, err := p.StatementList("")
 	if err != nil {
 		return nil, err
 	}
@@ -83,14 +84,14 @@ func (p *Parser) Program() (*Program, error) {
 //	: Statement
 //	| Statement StatementList
 ///*
-func (p *Parser) StatementList() ([]*Node, error) {
+func (p *Parser) StatementList(stopLookAhead string) ([]*Node, error) {
 	statements := make([]*Node, 0)
 	var statement, err = p.Statement()
 	if err != nil {
 		return nil, errors.New("literal: unexpected literal production")
 	}
 	statements = append(statements, statement)
-	for p.lookAhead != nil {
+	for p.lookAhead != nil && p.lookAhead.TokenType != stopLookAhead {
 		statement, err = p.Statement()
 		if err != nil {
 			return nil, errors.New("literal: unexpected literal production")
@@ -102,13 +103,46 @@ func (p *Parser) StatementList() ([]*Node, error) {
 
 // Statement
 //	: ExpressionStatement
+//	| BlockStatement
 ///*
 func (p *Parser) Statement() (*Node, error) {
-	expressionStatement, err := p.ExpressionStatement()
+	switch p.lookAhead.TokenType {
+	case tokenizer.OpenCurlyBrace:
+		blockStatement, err := p.BlockStatement()
+		if err != nil {
+			return nil, errors.New("literal: unexpected literal production")
+		}
+		return blockStatement, nil
+	default:
+		expressionStatement, err := p.ExpressionStatement()
+		if err != nil {
+			return nil, errors.New("literal: unexpected literal production")
+		}
+		return expressionStatement, nil
+	}
+}
+
+// BlockStatement
+//	: '{' OptStatementList '}'
+///*
+func (p *Parser) BlockStatement() (*Node, error) {
+	_, err := p.eat("{")
 	if err != nil {
 		return nil, errors.New("literal: unexpected literal production")
 	}
-	return expressionStatement, nil
+	if p.lookAhead.TokenType == tokenizer.CloseCurlyBrace {
+		return &Node{nodeType: BlockStatement, body: []*Node{}}, nil
+	}
+	statements, statementsErr := p.StatementList(tokenizer.CloseCurlyBrace)
+	if statementsErr != nil {
+		return nil, errors.New("literal: unexpected literal production")
+	}
+	_, err = p.eat(tokenizer.CloseCurlyBrace)
+	if err != nil {
+		return nil, errors.New("literal: unexpected literal production")
+	}
+
+	return &Node{nodeType: BlockStatement, body: statements}, nil
 }
 
 // ExpressionStatement
