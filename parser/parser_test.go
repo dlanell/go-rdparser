@@ -139,7 +139,7 @@ func TestRun(t *testing.T) {
 		})
 		t.Run("BlockStatement", func(t *testing.T) {
 			tests := map[string]test{
-				"given string and numeric expression": {
+				"given block statement with expressions": {
 					tokenizerText: `
 {
   'sith';
@@ -156,17 +156,29 @@ func TestRun(t *testing.T) {
 										nodeType: ExpressionStatement,
 										body: &Node{
 											nodeType: StringLiteral,
-											body: &StringLiteralValue{"sith"},
+											body:     &StringLiteralValue{"sith"},
 										},
 									},
 									{
 										nodeType: ExpressionStatement,
 										body: &Node{
 											nodeType: NumericLiteral,
-											body: &NumericLiteralValue{42},
+											body:     &NumericLiteralValue{42},
 										},
 									},
 								},
+							},
+						},
+					},
+				},
+				"given block statement without expressions": {
+					tokenizerText: `{}`,
+					expectedNode: &Program{
+						nodeType: ProgramEnum,
+						body: []*Node{
+							{
+								nodeType: BlockStatement,
+								body: []*Node{},
 							},
 						},
 					},

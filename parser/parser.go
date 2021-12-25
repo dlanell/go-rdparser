@@ -131,6 +131,10 @@ func (p *Parser) BlockStatement() (*Node, error) {
 		return nil, err
 	}
 	if p.lookAhead.TokenType == tokenizer.CloseCurlyBrace {
+		_, err = p.eat(tokenizer.CloseCurlyBrace)
+		if err != nil {
+			return nil, err
+		}
 		return &Node{nodeType: BlockStatement, body: []*Node{}}, nil
 	}
 	statements, statementsErr := p.StatementList(tokenizer.CloseCurlyBrace)
