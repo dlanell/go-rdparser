@@ -88,13 +88,13 @@ func (p *Parser) StatementList(stopLookAhead string) ([]*Node, error) {
 	statements := make([]*Node, 0)
 	var statement, err = p.Statement()
 	if err != nil {
-		return nil, errors.New("literal: unexpected literal production")
+		return nil, err
 	}
 	statements = append(statements, statement)
 	for p.lookAhead != nil && p.lookAhead.TokenType != stopLookAhead {
 		statement, err = p.Statement()
 		if err != nil {
-			return nil, errors.New("literal: unexpected literal production")
+			return nil, err
 		}
 		statements = append(statements, statement)
 	}
@@ -110,13 +110,13 @@ func (p *Parser) Statement() (*Node, error) {
 	case tokenizer.OpenCurlyBrace:
 		blockStatement, err := p.BlockStatement()
 		if err != nil {
-			return nil, errors.New("literal: unexpected literal production")
+			return nil, err
 		}
 		return blockStatement, nil
 	default:
 		expressionStatement, err := p.ExpressionStatement()
 		if err != nil {
-			return nil, errors.New("literal: unexpected literal production")
+			return nil, err
 		}
 		return expressionStatement, nil
 	}
@@ -128,18 +128,18 @@ func (p *Parser) Statement() (*Node, error) {
 func (p *Parser) BlockStatement() (*Node, error) {
 	_, err := p.eat("{")
 	if err != nil {
-		return nil, errors.New("literal: unexpected literal production")
+		return nil, err
 	}
 	if p.lookAhead.TokenType == tokenizer.CloseCurlyBrace {
 		return &Node{nodeType: BlockStatement, body: []*Node{}}, nil
 	}
 	statements, statementsErr := p.StatementList(tokenizer.CloseCurlyBrace)
 	if statementsErr != nil {
-		return nil, errors.New("literal: unexpected literal production")
+		return nil, err
 	}
 	_, err = p.eat(tokenizer.CloseCurlyBrace)
 	if err != nil {
-		return nil, errors.New("literal: unexpected literal production")
+		return nil, err
 	}
 
 	return &Node{nodeType: BlockStatement, body: statements}, nil
@@ -151,11 +151,11 @@ func (p *Parser) BlockStatement() (*Node, error) {
 func (p *Parser) ExpressionStatement() (*Node, error) {
 	expression, err := p.Expression()
 	if err != nil {
-		return nil, errors.New("literal: unexpected literal production")
+		return nil, err
 	}
 	_, err = p.eat(";")
 	if err != nil {
-		return nil, errors.New("literal: unexpected literal production")
+		return nil, err
 	}
 
 	return &Node{nodeType: ExpressionStatement, body: expression}, nil
@@ -179,7 +179,7 @@ func (p *Parser) Literal() (*Node, error) {
 	case tokenizer.StringToken:
 		return p.StringLiteral()
 	}
-	return nil, errors.New("literal: unexpected literal production")
+	return nil, fmt.Errorf("Unexpected token: %s\n", p.lookAhead.TokenType)
 }
 
 // NumericLiteral
