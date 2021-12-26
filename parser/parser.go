@@ -19,13 +19,13 @@ type Props struct {
 }
 
 type Program struct {
-	nodeType string
-	body     []*Node
+	NodeType string
+	Body     []*Node
 }
 
 type Node struct {
-	nodeType string
-	body     interface{}
+	NodeType string
+	Body     interface{}
 }
 
 type BinaryExpressionNode struct {
@@ -34,12 +34,17 @@ type BinaryExpressionNode struct {
 	right    interface{}
 }
 
+type VariableDeclarationValue struct {
+	id       *Node
+	init     *Node
+}
+
 type StringLiteralValue struct {
-	value string
+	Value string
 }
 
 type NumericLiteralValue struct {
-	value int
+	Value int
 }
 
 const (
@@ -51,6 +56,8 @@ const (
 	BlockStatement              = "BlockStatement"
 	BinaryExpression            = "BinaryExpression"
 	EmptyStatement              = "EmptyStatement"
+	VariableStatement           = "VariableStatement"
+	VariableDeclaration         = "VariableDeclaration"
 	ProgramEnum                 = "Program"
 )
 
@@ -85,8 +92,8 @@ func (p *Parser) Program() (*Program, error) {
 		return nil, err
 	}
 	return &Program{
-		nodeType: ProgramEnum,
-		body:     statements,
+		NodeType: ProgramEnum,
+		Body:     statements,
 	}, nil
 }
 
@@ -114,6 +121,8 @@ func (p *Parser) StatementList(stopLookAhead string) ([]*Node, error) {
 // Statement
 //	: ExpressionStatement
 //	| BlockStatement
+//	| EmptyStatement
+//	| VariableStatement
 ///*
 func (p *Parser) Statement() (*Node, error) {
 	switch p.lookAhead.TokenType {
@@ -121,9 +130,94 @@ func (p *Parser) Statement() (*Node, error) {
 		return p.EmptyStatement()
 	case tokenizer.OpenCurlyBrace:
 		return p.BlockStatement()
+	case tokenizer.LetKeyword:
+		return p.VariableStatement()
 	default:
 		return p.ExpressionStatement()
 	}
+}
+
+// VariableStatement
+//	: 'let' VariableDeclarationList ';'
+///*
+func (p *Parser) VariableStatement() (*Node, error) {
+	_, err := p.eat(tokenizer.LetKeyword)
+	if err != nil {
+		return nil, err
+	}
+	declarationList, declarationListErr := p.VariableDeclarationList()
+	if declarationListErr != nil {
+		return nil, declarationListErr
+	}
+
+	_, err = p.eat(tokenizer.SemiColonToken)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Node{NodeType: VariableStatement, Body: declarationList}, nil
+}
+
+// VariableDeclarationList
+//	: VariableDeclarationList ',' VariableDeclaration
+///*
+func (p *Parser) VariableDeclarationList() ([]*Node, error) {
+	declarations := make([]*Node, 0)
+
+	for ok := true; ok; ok = p.lookAhead.TokenType == tokenizer.Comma {
+		if p.lookAhead.TokenType == tokenizer.Comma {
+			_, err := p.eat(tokenizer.Comma)
+			if err != nil {
+				return nil, err
+			}
+		}
+		declaration, declarationErr := p.VariableDeclaration()
+		if declarationErr != nil {
+			return nil, declarationErr
+		}
+		declarations = append(declarations, declaration)
+	}
+
+	return declarations, nil
+}
+
+// VariableDeclaration
+//	: Identifier OptVariableInitialization
+///*
+func (p *Parser) VariableDeclaration() (*Node, error) {
+	identifier, err := p.Identifier()
+	if err != nil {
+		return nil, err
+	}
+
+	var init *Node
+	var initErr error
+
+	if p.lookAhead.TokenType != tokenizer.SemiColonToken && p.lookAhead.TokenType != tokenizer.Comma {
+		init, initErr = p.VariableInitializer()
+		if initErr != nil {
+			return nil, initErr
+		}
+	}
+
+	return &Node{
+		NodeType: VariableDeclaration,
+		Body:     &VariableDeclarationValue{
+			id:   identifier,
+			init: init,
+		},
+	}, nil
+}
+
+// VariableInitializer
+//	: SIMPLE_ASSIGNMENT AssignmentExpression
+///*
+func (p *Parser) VariableInitializer() (*Node, error) {
+	_, err := p.eat(tokenizer.SimpleAssignment)
+	if err != nil {
+		return nil, err
+	}
+	return p.AssignmentExpression()
 }
 
 // EmptyStatement
@@ -135,7 +229,7 @@ func (p *Parser) EmptyStatement() (*Node, error) {
 		return nil, err
 	}
 
-	return &Node{nodeType: EmptyStatement, body: nil}, nil
+	return &Node{NodeType: EmptyStatement, Body: nil}, nil
 }
 
 // BlockStatement
@@ -151,7 +245,7 @@ func (p *Parser) BlockStatement() (*Node, error) {
 		if err != nil {
 			return nil, err
 		}
-		return &Node{nodeType: BlockStatement, body: []*Node{}}, nil
+		return &Node{NodeType: BlockStatement, Body: []*Node{}}, nil
 	}
 	statements, statementsErr := p.StatementList(tokenizer.CloseCurlyBrace)
 	if statementsErr != nil {
@@ -162,7 +256,7 @@ func (p *Parser) BlockStatement() (*Node, error) {
 		return nil, err
 	}
 
-	return &Node{nodeType: BlockStatement, body: statements}, nil
+	return &Node{NodeType: BlockStatement, Body: statements}, nil
 }
 
 // ExpressionStatement
@@ -178,7 +272,7 @@ func (p *Parser) ExpressionStatement() (*Node, error) {
 		return nil, err
 	}
 
-	return &Node{nodeType: ExpressionStatement, body: expression}, nil
+	return &Node{NodeType: ExpressionStatement, Body: expression}, nil
 }
 
 // Expression
@@ -218,8 +312,8 @@ func (p *Parser) AssignmentExpression() (*Node, error) {
 	}
 
 	return &Node{
-		nodeType: AssignmentExpression,
-		body: &BinaryExpressionNode{
+		NodeType: AssignmentExpression,
+		Body: &BinaryExpressionNode{
 			operator: assignmentOperatorToken.Value,
 			left:     leftNode,
 			right:    rightNode,
@@ -243,8 +337,8 @@ func (p *Parser) Identifier() (*Node, error) {
 		return nil, err
 	}
 	return &Node{
-		nodeType: Identifier,
-		body:     &StringLiteralValue{token.Value},
+		NodeType: Identifier,
+		Body:     &StringLiteralValue{token.Value},
 	}, nil
 }
 
@@ -253,7 +347,7 @@ func isAssignmentOperator(tokenType string) bool {
 }
 
 func checkValidAssignmentTarget(node *Node) (*Node, error) {
-	if node.nodeType == Identifier {
+	if node.NodeType == Identifier {
 		return node, nil
 	}
 	return nil, errors.New("invalid left-hand side in assignment expression")
@@ -303,8 +397,8 @@ func (p *Parser) genericBinaryExpression(expression func() (*Node, error), opera
 		}
 
 		left = &Node{
-			nodeType: BinaryExpression,
-			body: &BinaryExpressionNode{
+			NodeType: BinaryExpression,
+			Body: &BinaryExpressionNode{
 				operator: operator.Value,
 				left:     left,
 				right:    right,
@@ -383,7 +477,7 @@ func (p *Parser) NumericLiteral() (*Node, error) {
 		return nil, errors.New("invalid number token")
 	}
 
-	return &Node{nodeType: NumericLiteral, body: &NumericLiteralValue{value: num}}, nil
+	return &Node{NodeType: NumericLiteral, Body: &NumericLiteralValue{Value: num}}, nil
 }
 
 // StringLiteral
@@ -395,7 +489,7 @@ func (p *Parser) StringLiteral() (*Node, error) {
 		return nil, tokenErr
 	}
 
-	return &Node{nodeType: StringLiteral, body: &StringLiteralValue{token.Value[1 : len(token.Value)-1]}}, nil
+	return &Node{NodeType: StringLiteral, Body: &StringLiteralValue{token.Value[1 : len(token.Value)-1]}}, nil
 }
 
 func (p *Parser) eat(tokenType string) (*tokenizer.Token, error) {

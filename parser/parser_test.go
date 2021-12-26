@@ -32,13 +32,13 @@ func TestRun(t *testing.T) {
 				"given numbers": {
 					text: `123;`,
 					expectedProgram: &Program{
-						nodeType: ProgramEnum,
-						body: []*Node{{
-							nodeType: ExpressionStatement,
-							body: &Node{
-								nodeType: NumericLiteral,
-								body: &NumericLiteralValue{
-									value: 123,
+						NodeType: ProgramEnum,
+						Body: []*Node{{
+							NodeType: ExpressionStatement,
+							Body: &Node{
+								NodeType: NumericLiteral,
+								Body: &NumericLiteralValue{
+									Value: 123,
 								}},
 						}},
 					},
@@ -46,13 +46,13 @@ func TestRun(t *testing.T) {
 				"given double quote string": {
 					text: `"sith";`,
 					expectedProgram: &Program{
-						nodeType: ProgramEnum,
-						body: []*Node{{
-							nodeType: ExpressionStatement,
-							body: &Node{
-								nodeType: StringLiteral,
-								body: &StringLiteralValue{
-									value: "sith",
+						NodeType: ProgramEnum,
+						Body: []*Node{{
+							NodeType: ExpressionStatement,
+							Body: &Node{
+								NodeType: StringLiteral,
+								Body: &StringLiteralValue{
+									Value: "sith",
 								}},
 						}},
 					},
@@ -60,13 +60,13 @@ func TestRun(t *testing.T) {
 				"given single quote string": {
 					text: `'sith';`,
 					expectedProgram: &Program{
-						nodeType: ProgramEnum,
-						body: []*Node{{
-							nodeType: ExpressionStatement,
-							body: &Node{
-								nodeType: StringLiteral,
-								body: &StringLiteralValue{
-									value: "sith",
+						NodeType: ProgramEnum,
+						Body: []*Node{{
+							NodeType: ExpressionStatement,
+							Body: &Node{
+								NodeType: StringLiteral,
+								Body: &StringLiteralValue{
+									Value: "sith",
 								},
 							},
 						}},
@@ -78,23 +78,23 @@ func TestRun(t *testing.T) {
 42;
 `,
 					expectedProgram: &Program{
-						nodeType: ProgramEnum,
-						body: []*Node{
+						NodeType: ProgramEnum,
+						Body: []*Node{
 							{
-								nodeType: ExpressionStatement,
-								body: &Node{
-									nodeType: StringLiteral,
-									body: &StringLiteralValue{
-										value: "sith",
+								NodeType: ExpressionStatement,
+								Body: &Node{
+									NodeType: StringLiteral,
+									Body: &StringLiteralValue{
+										Value: "sith",
 									},
 								},
 							},
 							{
-								nodeType: ExpressionStatement,
-								body: &Node{
-									nodeType: NumericLiteral,
-									body: &NumericLiteralValue{
-										value: 42,
+								NodeType: ExpressionStatement,
+								Body: &Node{
+									NodeType: NumericLiteral,
+									Body: &NumericLiteralValue{
+										Value: 42,
 									},
 								},
 							},
@@ -117,21 +117,21 @@ func TestRun(t *testing.T) {
 				"given 2 + 2": {
 					text: `2 + 2;`,
 					expectedProgram: &Program{
-						nodeType: ProgramEnum,
-						body: []*Node{
+						NodeType: ProgramEnum,
+						Body: []*Node{
 							{
-								nodeType: ExpressionStatement,
-								body: &Node{
-									nodeType: BinaryExpression,
-									body: &BinaryExpressionNode{
+								NodeType: ExpressionStatement,
+								Body: &Node{
+									NodeType: BinaryExpression,
+									Body: &BinaryExpressionNode{
 										operator: "+",
 										left: &Node{
-											nodeType: NumericLiteral,
-											body:     &NumericLiteralValue{2},
+											NodeType: NumericLiteral,
+											Body:     &NumericLiteralValue{2},
 										},
 										right: &Node{
-											nodeType: NumericLiteral,
-											body:     &NumericLiteralValue{2},
+											NodeType: NumericLiteral,
+											Body:     &NumericLiteralValue{2},
 										},
 									},
 								},
@@ -142,21 +142,21 @@ func TestRun(t *testing.T) {
 				"given x + x": {
 					text: `x + x;`,
 					expectedProgram: &Program{
-						nodeType: ProgramEnum,
-						body: []*Node{
+						NodeType: ProgramEnum,
+						Body: []*Node{
 							{
-								nodeType: ExpressionStatement,
-								body: &Node{
-									nodeType: BinaryExpression,
-									body: &BinaryExpressionNode{
+								NodeType: ExpressionStatement,
+								Body: &Node{
+									NodeType: BinaryExpression,
+									Body: &BinaryExpressionNode{
 										operator: "+",
 										left: &Node{
-											nodeType: Identifier,
-											body:     &StringLiteralValue{"x"},
+											NodeType: Identifier,
+											Body:     &StringLiteralValue{"x"},
 										},
 										right: &Node{
-											nodeType: Identifier,
-											body:     &StringLiteralValue{"x"},
+											NodeType: Identifier,
+											Body:     &StringLiteralValue{"x"},
 										},
 									},
 								},
@@ -167,21 +167,21 @@ func TestRun(t *testing.T) {
 				"given 2 * 2": {
 					text: `2 * 2;`,
 					expectedProgram: &Program{
-						nodeType: ProgramEnum,
-						body: []*Node{
+						NodeType: ProgramEnum,
+						Body: []*Node{
 							{
-								nodeType: ExpressionStatement,
-								body: &Node{
-									nodeType: BinaryExpression,
-									body: &BinaryExpressionNode{
+								NodeType: ExpressionStatement,
+								Body: &Node{
+									NodeType: BinaryExpression,
+									Body: &BinaryExpressionNode{
 										operator: "*",
 										left: &Node{
-											nodeType: NumericLiteral,
-											body:     &NumericLiteralValue{2},
+											NodeType: NumericLiteral,
+											Body:     &NumericLiteralValue{2},
 										},
 										right: &Node{
-											nodeType: NumericLiteral,
-											body:     &NumericLiteralValue{2},
+											NodeType: NumericLiteral,
+											Body:     &NumericLiteralValue{2},
 										},
 									},
 								},
@@ -192,31 +192,31 @@ func TestRun(t *testing.T) {
 				"given chained additive operators 3 + 2 - 2": {
 					text: `3 + 2 - 2;`,
 					expectedProgram: &Program{
-						nodeType: ProgramEnum,
-						body: []*Node{
+						NodeType: ProgramEnum,
+						Body: []*Node{
 							{
-								nodeType: ExpressionStatement,
-								body: &Node{
-									nodeType: BinaryExpression,
-									body: &BinaryExpressionNode{
+								NodeType: ExpressionStatement,
+								Body: &Node{
+									NodeType: BinaryExpression,
+									Body: &BinaryExpressionNode{
 										operator: "-",
 										left: &Node{
-											nodeType: BinaryExpression,
-											body: &BinaryExpressionNode{
+											NodeType: BinaryExpression,
+											Body: &BinaryExpressionNode{
 												operator: "+",
 												left: &Node{
-													nodeType: NumericLiteral,
-													body:     &NumericLiteralValue{3},
+													NodeType: NumericLiteral,
+													Body:     &NumericLiteralValue{3},
 												},
 												right: &Node{
-													nodeType: NumericLiteral,
-													body:     &NumericLiteralValue{2},
+													NodeType: NumericLiteral,
+													Body:     &NumericLiteralValue{2},
 												},
 											},
 										},
 										right: &Node{
-											nodeType: NumericLiteral,
-											body:     &NumericLiteralValue{2},
+											NodeType: NumericLiteral,
+											Body:     &NumericLiteralValue{2},
 										},
 									},
 								},
@@ -227,29 +227,29 @@ func TestRun(t *testing.T) {
 				"given chained additive operators with parentheses 3 + ( 2 - 2 )": {
 					text: `3 + ( 2 - 2 );`,
 					expectedProgram: &Program{
-						nodeType: ProgramEnum,
-						body: []*Node{
+						NodeType: ProgramEnum,
+						Body: []*Node{
 							{
-								nodeType: ExpressionStatement,
-								body: &Node{
-									nodeType: BinaryExpression,
-									body: &BinaryExpressionNode{
+								NodeType: ExpressionStatement,
+								Body: &Node{
+									NodeType: BinaryExpression,
+									Body: &BinaryExpressionNode{
 										operator: "+",
 										left: &Node{
-											nodeType: NumericLiteral,
-											body:     &NumericLiteralValue{3},
+											NodeType: NumericLiteral,
+											Body:     &NumericLiteralValue{3},
 										},
 										right: &Node{
-											nodeType: BinaryExpression,
-											body: &BinaryExpressionNode{
+											NodeType: BinaryExpression,
+											Body: &BinaryExpressionNode{
 												operator: "-",
 												left: &Node{
-													nodeType: NumericLiteral,
-													body:     &NumericLiteralValue{2},
+													NodeType: NumericLiteral,
+													Body:     &NumericLiteralValue{2},
 												},
 												right: &Node{
-													nodeType: NumericLiteral,
-													body:     &NumericLiteralValue{2},
+													NodeType: NumericLiteral,
+													Body:     &NumericLiteralValue{2},
 												},
 											},
 										},
@@ -262,31 +262,31 @@ func TestRun(t *testing.T) {
 				"given chained multiplicative operators 3 * 2 / 2": {
 					text: `3 * 2 / 2;`,
 					expectedProgram: &Program{
-						nodeType: ProgramEnum,
-						body: []*Node{
+						NodeType: ProgramEnum,
+						Body: []*Node{
 							{
-								nodeType: ExpressionStatement,
-								body: &Node{
-									nodeType: BinaryExpression,
-									body: &BinaryExpressionNode{
+								NodeType: ExpressionStatement,
+								Body: &Node{
+									NodeType: BinaryExpression,
+									Body: &BinaryExpressionNode{
 										operator: "/",
 										left: &Node{
-											nodeType: BinaryExpression,
-											body: &BinaryExpressionNode{
+											NodeType: BinaryExpression,
+											Body: &BinaryExpressionNode{
 												operator: "*",
 												left: &Node{
-													nodeType: NumericLiteral,
-													body:     &NumericLiteralValue{3},
+													NodeType: NumericLiteral,
+													Body:     &NumericLiteralValue{3},
 												},
 												right: &Node{
-													nodeType: NumericLiteral,
-													body:     &NumericLiteralValue{2},
+													NodeType: NumericLiteral,
+													Body:     &NumericLiteralValue{2},
 												},
 											},
 										},
 										right: &Node{
-											nodeType: NumericLiteral,
-											body:     &NumericLiteralValue{2},
+											NodeType: NumericLiteral,
+											Body:     &NumericLiteralValue{2},
 										},
 									},
 								},
@@ -297,29 +297,29 @@ func TestRun(t *testing.T) {
 				"given chained multiplicative & additive operators 3 + 2 * 2": {
 					text: `3 + 2 * 2;`,
 					expectedProgram: &Program{
-						nodeType: ProgramEnum,
-						body: []*Node{
+						NodeType: ProgramEnum,
+						Body: []*Node{
 							{
-								nodeType: ExpressionStatement,
-								body: &Node{
-									nodeType: BinaryExpression,
-									body: &BinaryExpressionNode{
+								NodeType: ExpressionStatement,
+								Body: &Node{
+									NodeType: BinaryExpression,
+									Body: &BinaryExpressionNode{
 										operator: "+",
 										left: &Node{
-											nodeType: NumericLiteral,
-											body:     &NumericLiteralValue{3},
+											NodeType: NumericLiteral,
+											Body:     &NumericLiteralValue{3},
 										},
 										right: &Node{
-											nodeType: BinaryExpression,
-											body: &BinaryExpressionNode{
+											NodeType: BinaryExpression,
+											Body: &BinaryExpressionNode{
 												operator: "*",
 												left: &Node{
-													nodeType: NumericLiteral,
-													body:     &NumericLiteralValue{2},
+													NodeType: NumericLiteral,
+													Body:     &NumericLiteralValue{2},
 												},
 												right: &Node{
-													nodeType: NumericLiteral,
-													body:     &NumericLiteralValue{2},
+													NodeType: NumericLiteral,
+													Body:     &NumericLiteralValue{2},
 												},
 											},
 										},
@@ -332,31 +332,31 @@ func TestRun(t *testing.T) {
 				"given chained multiplicative & additive operators with parentheses (3 + 2) * 2": {
 					text: `(3 + 2) * 2;`,
 					expectedProgram: &Program{
-						nodeType: ProgramEnum,
-						body: []*Node{
+						NodeType: ProgramEnum,
+						Body: []*Node{
 							{
-								nodeType: ExpressionStatement,
-								body: &Node{
-									nodeType: BinaryExpression,
-									body: &BinaryExpressionNode{
+								NodeType: ExpressionStatement,
+								Body: &Node{
+									NodeType: BinaryExpression,
+									Body: &BinaryExpressionNode{
 										operator: "*",
 										left: &Node{
-											nodeType: BinaryExpression,
-											body: &BinaryExpressionNode{
+											NodeType: BinaryExpression,
+											Body: &BinaryExpressionNode{
 												operator: "+",
 												left: &Node{
-													nodeType: NumericLiteral,
-													body:     &NumericLiteralValue{3},
+													NodeType: NumericLiteral,
+													Body:     &NumericLiteralValue{3},
 												},
 												right: &Node{
-													nodeType: NumericLiteral,
-													body:     &NumericLiteralValue{2},
+													NodeType: NumericLiteral,
+													Body:     &NumericLiteralValue{2},
 												},
 											},
 										},
 										right: &Node{
-											nodeType: NumericLiteral,
-											body:     &NumericLiteralValue{2},
+											NodeType: NumericLiteral,
+											Body:     &NumericLiteralValue{2},
 										},
 									},
 								},
@@ -370,38 +370,38 @@ func TestRun(t *testing.T) {
 35 + 24;
 `,
 					expectedProgram: &Program{
-						nodeType: ProgramEnum,
-						body: []*Node{
+						NodeType: ProgramEnum,
+						Body: []*Node{
 							{
-								nodeType: ExpressionStatement,
-								body: &Node{
-									nodeType: BinaryExpression,
-									body: &BinaryExpressionNode{
+								NodeType: ExpressionStatement,
+								Body: &Node{
+									NodeType: BinaryExpression,
+									Body: &BinaryExpressionNode{
 										operator: "+",
 										left: &Node{
-											nodeType: NumericLiteral,
-											body:     &NumericLiteralValue{2},
+											NodeType: NumericLiteral,
+											Body:     &NumericLiteralValue{2},
 										},
 										right: &Node{
-											nodeType: NumericLiteral,
-											body:     &NumericLiteralValue{2},
+											NodeType: NumericLiteral,
+											Body:     &NumericLiteralValue{2},
 										},
 									},
 								},
 							},
 							{
-								nodeType: ExpressionStatement,
-								body: &Node{
-									nodeType: BinaryExpression,
-									body: &BinaryExpressionNode{
+								NodeType: ExpressionStatement,
+								Body: &Node{
+									NodeType: BinaryExpression,
+									Body: &BinaryExpressionNode{
 										operator: "+",
 										left: &Node{
-											nodeType: NumericLiteral,
-											body:     &NumericLiteralValue{35},
+											NodeType: NumericLiteral,
+											Body:     &NumericLiteralValue{35},
 										},
 										right: &Node{
-											nodeType: NumericLiteral,
-											body:     &NumericLiteralValue{24},
+											NodeType: NumericLiteral,
+											Body:     &NumericLiteralValue{24},
 										},
 									},
 								},
@@ -415,38 +415,38 @@ func TestRun(t *testing.T) {
 35 / 24;
 `,
 					expectedProgram: &Program{
-						nodeType: ProgramEnum,
-						body: []*Node{
+						NodeType: ProgramEnum,
+						Body: []*Node{
 							{
-								nodeType: ExpressionStatement,
-								body: &Node{
-									nodeType: BinaryExpression,
-									body: &BinaryExpressionNode{
+								NodeType: ExpressionStatement,
+								Body: &Node{
+									NodeType: BinaryExpression,
+									Body: &BinaryExpressionNode{
 										operator: "*",
 										left: &Node{
-											nodeType: NumericLiteral,
-											body:     &NumericLiteralValue{2},
+											NodeType: NumericLiteral,
+											Body:     &NumericLiteralValue{2},
 										},
 										right: &Node{
-											nodeType: NumericLiteral,
-											body:     &NumericLiteralValue{2},
+											NodeType: NumericLiteral,
+											Body:     &NumericLiteralValue{2},
 										},
 									},
 								},
 							},
 							{
-								nodeType: ExpressionStatement,
-								body: &Node{
-									nodeType: BinaryExpression,
-									body: &BinaryExpressionNode{
+								NodeType: ExpressionStatement,
+								Body: &Node{
+									NodeType: BinaryExpression,
+									Body: &BinaryExpressionNode{
 										operator: "/",
 										left: &Node{
-											nodeType: NumericLiteral,
-											body:     &NumericLiteralValue{35},
+											NodeType: NumericLiteral,
+											Body:     &NumericLiteralValue{35},
 										},
 										right: &Node{
-											nodeType: NumericLiteral,
-											body:     &NumericLiteralValue{24},
+											NodeType: NumericLiteral,
+											Body:     &NumericLiteralValue{24},
 										},
 									},
 								},
@@ -468,27 +468,27 @@ func TestRun(t *testing.T) {
 		t.Run("Assignment BinaryExpression", func(t *testing.T) {
 			tests := map[string]test{
 				"given 42 = 42": {
-					text: `42 = 42;`,
+					text:          `42 = 42;`,
 					expectedError: errors.New("invalid left-hand side in assignment expression"),
 				},
 				"given x = 42": {
 					text: `x = 42;`,
 					expectedProgram: &Program{
-						nodeType: ProgramEnum,
-						body: []*Node{
+						NodeType: ProgramEnum,
+						Body: []*Node{
 							{
-								nodeType: ExpressionStatement,
-								body: &Node{
-									nodeType: AssignmentExpression,
-									body: &BinaryExpressionNode{
+								NodeType: ExpressionStatement,
+								Body: &Node{
+									NodeType: AssignmentExpression,
+									Body: &BinaryExpressionNode{
 										operator: "=",
 										left: &Node{
-											nodeType: Identifier,
-											body:     &StringLiteralValue{`x`},
+											NodeType: Identifier,
+											Body:     &StringLiteralValue{`x`},
 										},
 										right: &Node{
-											nodeType: NumericLiteral,
-											body:     &NumericLiteralValue{42},
+											NodeType: NumericLiteral,
+											Body:     &NumericLiteralValue{42},
 										},
 									},
 								},
@@ -499,21 +499,21 @@ func TestRun(t *testing.T) {
 				"given x += 42": {
 					text: `x += 42;`,
 					expectedProgram: &Program{
-						nodeType: ProgramEnum,
-						body: []*Node{
+						NodeType: ProgramEnum,
+						Body: []*Node{
 							{
-								nodeType: ExpressionStatement,
-								body: &Node{
-									nodeType: AssignmentExpression,
-									body: &BinaryExpressionNode{
+								NodeType: ExpressionStatement,
+								Body: &Node{
+									NodeType: AssignmentExpression,
+									Body: &BinaryExpressionNode{
 										operator: "+=",
 										left: &Node{
-											nodeType: Identifier,
-											body:     &StringLiteralValue{`x`},
+											NodeType: Identifier,
+											Body:     &StringLiteralValue{`x`},
 										},
 										right: &Node{
-											nodeType: NumericLiteral,
-											body:     &NumericLiteralValue{42},
+											NodeType: NumericLiteral,
+											Body:     &NumericLiteralValue{42},
 										},
 									},
 								},
@@ -524,21 +524,21 @@ func TestRun(t *testing.T) {
 				"given x -= 42": {
 					text: `x -= 42;`,
 					expectedProgram: &Program{
-						nodeType: ProgramEnum,
-						body: []*Node{
+						NodeType: ProgramEnum,
+						Body: []*Node{
 							{
-								nodeType: ExpressionStatement,
-								body: &Node{
-									nodeType: AssignmentExpression,
-									body: &BinaryExpressionNode{
+								NodeType: ExpressionStatement,
+								Body: &Node{
+									NodeType: AssignmentExpression,
+									Body: &BinaryExpressionNode{
 										operator: "-=",
 										left: &Node{
-											nodeType: Identifier,
-											body:     &StringLiteralValue{`x`},
+											NodeType: Identifier,
+											Body:     &StringLiteralValue{`x`},
 										},
 										right: &Node{
-											nodeType: NumericLiteral,
-											body:     &NumericLiteralValue{42},
+											NodeType: NumericLiteral,
+											Body:     &NumericLiteralValue{42},
 										},
 									},
 								},
@@ -549,21 +549,21 @@ func TestRun(t *testing.T) {
 				"given x *= 42": {
 					text: `x *= 42;`,
 					expectedProgram: &Program{
-						nodeType: ProgramEnum,
-						body: []*Node{
+						NodeType: ProgramEnum,
+						Body: []*Node{
 							{
-								nodeType: ExpressionStatement,
-								body: &Node{
-									nodeType: AssignmentExpression,
-									body: &BinaryExpressionNode{
+								NodeType: ExpressionStatement,
+								Body: &Node{
+									NodeType: AssignmentExpression,
+									Body: &BinaryExpressionNode{
 										operator: "*=",
 										left: &Node{
-											nodeType: Identifier,
-											body:     &StringLiteralValue{`x`},
+											NodeType: Identifier,
+											Body:     &StringLiteralValue{`x`},
 										},
 										right: &Node{
-											nodeType: NumericLiteral,
-											body:     &NumericLiteralValue{42},
+											NodeType: NumericLiteral,
+											Body:     &NumericLiteralValue{42},
 										},
 									},
 								},
@@ -574,21 +574,21 @@ func TestRun(t *testing.T) {
 				"given x /= 42": {
 					text: `x /= 42;`,
 					expectedProgram: &Program{
-						nodeType: ProgramEnum,
-						body: []*Node{
+						NodeType: ProgramEnum,
+						Body: []*Node{
 							{
-								nodeType: ExpressionStatement,
-								body: &Node{
-									nodeType: AssignmentExpression,
-									body: &BinaryExpressionNode{
+								NodeType: ExpressionStatement,
+								Body: &Node{
+									NodeType: AssignmentExpression,
+									Body: &BinaryExpressionNode{
 										operator: "/=",
 										left: &Node{
-											nodeType: Identifier,
-											body:     &StringLiteralValue{`x`},
+											NodeType: Identifier,
+											Body:     &StringLiteralValue{`x`},
 										},
 										right: &Node{
-											nodeType: NumericLiteral,
-											body:     &NumericLiteralValue{42},
+											NodeType: NumericLiteral,
+											Body:     &NumericLiteralValue{42},
 										},
 									},
 								},
@@ -599,29 +599,29 @@ func TestRun(t *testing.T) {
 				"given x = y = 42": {
 					text: `x = y = 42;`,
 					expectedProgram: &Program{
-						nodeType: ProgramEnum,
-						body: []*Node{
+						NodeType: ProgramEnum,
+						Body: []*Node{
 							{
-								nodeType: ExpressionStatement,
-								body: &Node{
-									nodeType: AssignmentExpression,
-									body: &BinaryExpressionNode{
+								NodeType: ExpressionStatement,
+								Body: &Node{
+									NodeType: AssignmentExpression,
+									Body: &BinaryExpressionNode{
 										operator: "=",
 										left: &Node{
-											nodeType: Identifier,
-											body:     &StringLiteralValue{`x`},
+											NodeType: Identifier,
+											Body:     &StringLiteralValue{`x`},
 										},
 										right: &Node{
-											nodeType: AssignmentExpression,
-											body: &BinaryExpressionNode{
+											NodeType: AssignmentExpression,
+											Body: &BinaryExpressionNode{
 												operator: "=",
 												left: &Node{
-													nodeType: Identifier,
-													body:     &StringLiteralValue{`y`},
+													NodeType: Identifier,
+													Body:     &StringLiteralValue{`y`},
 												},
 												right: &Node{
-													nodeType: NumericLiteral,
-													body:     &NumericLiteralValue{42},
+													NodeType: NumericLiteral,
+													Body:     &NumericLiteralValue{42},
 												},
 											},
 										},
@@ -652,23 +652,23 @@ func TestRun(t *testing.T) {
 }
 `,
 					expectedProgram: &Program{
-						nodeType: ProgramEnum,
-						body: []*Node{
+						NodeType: ProgramEnum,
+						Body: []*Node{
 							{
-								nodeType: BlockStatement,
-								body: []*Node{
+								NodeType: BlockStatement,
+								Body: []*Node{
 									{
-										nodeType: ExpressionStatement,
-										body: &Node{
-											nodeType: StringLiteral,
-											body:     &StringLiteralValue{"sith"},
+										NodeType: ExpressionStatement,
+										Body: &Node{
+											NodeType: StringLiteral,
+											Body:     &StringLiteralValue{"sith"},
 										},
 									},
 									{
-										nodeType: ExpressionStatement,
-										body: &Node{
-											nodeType: NumericLiteral,
-											body:     &NumericLiteralValue{42},
+										NodeType: ExpressionStatement,
+										Body: &Node{
+											NodeType: NumericLiteral,
+											Body:     &NumericLiteralValue{42},
 										},
 									},
 								},
@@ -686,25 +686,25 @@ func TestRun(t *testing.T) {
 }
 `,
 					expectedProgram: &Program{
-						nodeType: ProgramEnum,
-						body: []*Node{
+						NodeType: ProgramEnum,
+						Body: []*Node{
 							{
-								nodeType: BlockStatement,
-								body: []*Node{
+								NodeType: BlockStatement,
+								Body: []*Node{
 									{
-										nodeType: ExpressionStatement,
-										body: &Node{
-											nodeType: StringLiteral,
-											body:     &StringLiteralValue{"sith"},
+										NodeType: ExpressionStatement,
+										Body: &Node{
+											NodeType: StringLiteral,
+											Body:     &StringLiteralValue{"sith"},
 										},
 									},
 									{
-										nodeType: BlockStatement,
-										body: []*Node{{
-											nodeType: ExpressionStatement,
-											body: &Node{
-												nodeType: NumericLiteral,
-												body:     &NumericLiteralValue{42},
+										NodeType: BlockStatement,
+										Body: []*Node{{
+											NodeType: ExpressionStatement,
+											Body: &Node{
+												NodeType: NumericLiteral,
+												Body:     &NumericLiteralValue{42},
 											},
 										}},
 									},
@@ -716,11 +716,11 @@ func TestRun(t *testing.T) {
 				"given block statement without expressions": {
 					text: `{}`,
 					expectedProgram: &Program{
-						nodeType: ProgramEnum,
-						body: []*Node{
+						NodeType: ProgramEnum,
+						Body: []*Node{
 							{
-								nodeType: BlockStatement,
-								body:     []*Node{},
+								NodeType: BlockStatement,
+								Body:     []*Node{},
 							},
 						},
 					},
@@ -741,11 +741,142 @@ func TestRun(t *testing.T) {
 				"given empty statement": {
 					text: `;`,
 					expectedProgram: &Program{
-						nodeType: ProgramEnum,
-						body: []*Node{
+						NodeType: ProgramEnum,
+						Body: []*Node{
 							{
-								nodeType: EmptyStatement,
-								body:     nil,
+								NodeType: EmptyStatement,
+								Body:     nil,
+							},
+						},
+					},
+				},
+			}
+
+			for name, tc := range tests {
+				t.Run(name, func(t *testing.T) {
+					parser := New(Props{Text: tc.text})
+					node, err := parser.Run()
+					assert.Equal(t, tc.expectedProgram, node)
+					assert.Equal(t, tc.expectedError, err)
+				})
+			}
+		})
+		t.Run("VariableStatement", func(t *testing.T) {
+			tests := map[string]test{
+				"given let x = 42": {
+					text: `let x = 42;`,
+					expectedProgram: &Program{
+						NodeType: ProgramEnum,
+						Body: []*Node{
+							{
+								NodeType: VariableStatement,
+								Body: []*Node{
+									{
+										NodeType: VariableDeclaration,
+										Body: &VariableDeclarationValue{
+											id:   &Node{
+												NodeType: Identifier,
+												Body:     &StringLiteralValue{`x`},
+											},
+											init: &Node{
+												NodeType: NumericLiteral,
+												Body:     &NumericLiteralValue{42},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+				"given let x": {
+					text: `let x;`,
+					expectedProgram: &Program{
+						NodeType: ProgramEnum,
+						Body: []*Node{
+							{
+								NodeType: VariableStatement,
+								Body: []*Node{
+									{
+										NodeType: VariableDeclaration,
+										Body: &VariableDeclarationValue{
+											id: &Node{
+												NodeType: Identifier,
+												Body:     &StringLiteralValue{`x`},
+											},
+											init: nil,
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+				"given let x, y": {
+					text: `let x, y;`,
+					expectedProgram: &Program{
+						NodeType: ProgramEnum,
+						Body: []*Node{
+							{
+								NodeType: VariableStatement,
+								Body: []*Node{
+									{
+										NodeType: VariableDeclaration,
+										Body: &VariableDeclarationValue{
+											id: &Node{
+												NodeType: Identifier,
+												Body:     &StringLiteralValue{`x`},
+											},
+											init: nil,
+										},
+									},
+									{
+										NodeType: VariableDeclaration,
+										Body: &VariableDeclarationValue{
+											id: &Node{
+												NodeType: Identifier,
+												Body:     &StringLiteralValue{`y`},
+											},
+											init: nil,
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+				"given let x, y = 45": {
+					text: `let x, y = 45;`,
+					expectedProgram: &Program{
+						NodeType: ProgramEnum,
+						Body: []*Node{
+							{
+								NodeType: VariableStatement,
+								Body: []*Node{
+									{
+										NodeType: VariableDeclaration,
+										Body: &VariableDeclarationValue{
+											id: &Node{
+												NodeType: Identifier,
+												Body:     &StringLiteralValue{`x`},
+											},
+											init: nil,
+										},
+									},
+									{
+										NodeType: VariableDeclaration,
+										Body: &VariableDeclarationValue{
+											id: &Node{
+												NodeType: Identifier,
+												Body:     &StringLiteralValue{`y`},
+											},
+											init: &Node{
+												NodeType: NumericLiteral,
+												Body:     &NumericLiteralValue{45},
+											},
+										},
+									},
+								},
 							},
 						},
 					},

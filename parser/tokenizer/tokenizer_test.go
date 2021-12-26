@@ -62,6 +62,13 @@ func TestGetNextToken(t *testing.T) {
 					Value:     ")",
 				},
 			},
+			"given ,": {
+				tokenizerText: `,`,
+				expectedToken: &Token{
+					TokenType: Comma,
+					Value:     ",",
+				},
+			},
 		}
 
 		for name, tc := range tests {
@@ -355,6 +362,26 @@ comment
 				expectedToken: &Token{
 					TokenType: ComplexAssignment,
 					Value:     `/=`,
+				},
+			},
+		}
+
+		for name, tc := range tests {
+			t.Run(name, func(t *testing.T) {
+				tokenizer := New(Props{Text: tc.tokenizerText})
+				token, err := tokenizer.GetNextToken()
+				assert.Equal(t, tc.expectedToken, token)
+				assert.Equal(t, tc.expectedError, err)
+			})
+		}
+	})
+	t.Run("Keywords", func(t *testing.T) {
+		tests := map[string]test{
+			"given let": {
+				tokenizerText: `let`,
+				expectedToken: &Token{
+					TokenType: LetKeyword,
+					Value:     `let`,
 				},
 			},
 		}

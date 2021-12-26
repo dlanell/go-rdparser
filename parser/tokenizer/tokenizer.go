@@ -30,9 +30,11 @@ const (
 	CloseCurlyBrace               = "}"
 	OpenParentheses               = "("
 	CloseParentheses              = ")"
+	Comma                         = ","
 	Identifier                    = "IDENTIFIER"
 	SimpleAssignment              = "SIMPLE_ASSIGNMENT"
 	ComplexAssignment             = "COMPLEX_ASSIGNMENT"
+	LetKeyword                    = "let"
 	SkipToken                     = ""
 )
 
@@ -74,6 +76,12 @@ var spec = [][]string{
 	{`^}`, CloseCurlyBrace},
 	{`^\(`, OpenParentheses},
 	{`^\)`, CloseParentheses},
+	{`^\,`, Comma},
+
+	//---------------------------------------------------
+	// Keywords
+
+	{`^\blet\b`, LetKeyword},
 
 	//---------------------------------------------------
 	// Numbers
