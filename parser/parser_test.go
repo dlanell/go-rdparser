@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/dlanell/go-rdparser/parser/tokenizer"
@@ -138,6 +139,31 @@ func TestRun(t *testing.T) {
 						},
 					},
 				},
+				"given x + x": {
+					text: `x + x;`,
+					expectedProgram: &Program{
+						nodeType: ProgramEnum,
+						body: []*Node{
+							{
+								nodeType: ExpressionStatement,
+								body: &Node{
+									nodeType: BinaryExpression,
+									body: &BinaryExpressionNode{
+										operator: "+",
+										left: &Node{
+											nodeType: Identifier,
+											body:     &StringLiteralValue{"x"},
+										},
+										right: &Node{
+											nodeType: Identifier,
+											body:     &StringLiteralValue{"x"},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
 				"given 2 * 2": {
 					text: `2 * 2;`,
 					expectedProgram: &Program{
@@ -215,7 +241,7 @@ func TestRun(t *testing.T) {
 										},
 										right: &Node{
 											nodeType: BinaryExpression,
-											body:     &BinaryExpressionNode{
+											body: &BinaryExpressionNode{
 												operator: "-",
 												left: &Node{
 													nodeType: NumericLiteral,
@@ -421,6 +447,183 @@ func TestRun(t *testing.T) {
 										right: &Node{
 											nodeType: NumericLiteral,
 											body:     &NumericLiteralValue{24},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			}
+
+			for name, tc := range tests {
+				t.Run(name, func(t *testing.T) {
+					parser := New(Props{Text: tc.text})
+					node, err := parser.Run()
+					assert.Equal(t, tc.expectedProgram, node)
+					assert.Equal(t, tc.expectedError, err)
+				})
+			}
+		})
+		t.Run("Assignment BinaryExpression", func(t *testing.T) {
+			tests := map[string]test{
+				"given 42 = 42": {
+					text: `42 = 42;`,
+					expectedError: errors.New("invalid left-hand side in assignment expression"),
+				},
+				"given x = 42": {
+					text: `x = 42;`,
+					expectedProgram: &Program{
+						nodeType: ProgramEnum,
+						body: []*Node{
+							{
+								nodeType: ExpressionStatement,
+								body: &Node{
+									nodeType: AssignmentExpression,
+									body: &BinaryExpressionNode{
+										operator: "=",
+										left: &Node{
+											nodeType: Identifier,
+											body:     &StringLiteralValue{`x`},
+										},
+										right: &Node{
+											nodeType: NumericLiteral,
+											body:     &NumericLiteralValue{42},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+				"given x += 42": {
+					text: `x += 42;`,
+					expectedProgram: &Program{
+						nodeType: ProgramEnum,
+						body: []*Node{
+							{
+								nodeType: ExpressionStatement,
+								body: &Node{
+									nodeType: AssignmentExpression,
+									body: &BinaryExpressionNode{
+										operator: "+=",
+										left: &Node{
+											nodeType: Identifier,
+											body:     &StringLiteralValue{`x`},
+										},
+										right: &Node{
+											nodeType: NumericLiteral,
+											body:     &NumericLiteralValue{42},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+				"given x -= 42": {
+					text: `x -= 42;`,
+					expectedProgram: &Program{
+						nodeType: ProgramEnum,
+						body: []*Node{
+							{
+								nodeType: ExpressionStatement,
+								body: &Node{
+									nodeType: AssignmentExpression,
+									body: &BinaryExpressionNode{
+										operator: "-=",
+										left: &Node{
+											nodeType: Identifier,
+											body:     &StringLiteralValue{`x`},
+										},
+										right: &Node{
+											nodeType: NumericLiteral,
+											body:     &NumericLiteralValue{42},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+				"given x *= 42": {
+					text: `x *= 42;`,
+					expectedProgram: &Program{
+						nodeType: ProgramEnum,
+						body: []*Node{
+							{
+								nodeType: ExpressionStatement,
+								body: &Node{
+									nodeType: AssignmentExpression,
+									body: &BinaryExpressionNode{
+										operator: "*=",
+										left: &Node{
+											nodeType: Identifier,
+											body:     &StringLiteralValue{`x`},
+										},
+										right: &Node{
+											nodeType: NumericLiteral,
+											body:     &NumericLiteralValue{42},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+				"given x /= 42": {
+					text: `x /= 42;`,
+					expectedProgram: &Program{
+						nodeType: ProgramEnum,
+						body: []*Node{
+							{
+								nodeType: ExpressionStatement,
+								body: &Node{
+									nodeType: AssignmentExpression,
+									body: &BinaryExpressionNode{
+										operator: "/=",
+										left: &Node{
+											nodeType: Identifier,
+											body:     &StringLiteralValue{`x`},
+										},
+										right: &Node{
+											nodeType: NumericLiteral,
+											body:     &NumericLiteralValue{42},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+				"given x = y = 42": {
+					text: `x = y = 42;`,
+					expectedProgram: &Program{
+						nodeType: ProgramEnum,
+						body: []*Node{
+							{
+								nodeType: ExpressionStatement,
+								body: &Node{
+									nodeType: AssignmentExpression,
+									body: &BinaryExpressionNode{
+										operator: "=",
+										left: &Node{
+											nodeType: Identifier,
+											body:     &StringLiteralValue{`x`},
+										},
+										right: &Node{
+											nodeType: AssignmentExpression,
+											body: &BinaryExpressionNode{
+												operator: "=",
+												left: &Node{
+													nodeType: Identifier,
+													body:     &StringLiteralValue{`y`},
+												},
+												right: &Node{
+													nodeType: NumericLiteral,
+													body:     &NumericLiteralValue{42},
+												},
+											},
 										},
 									},
 								},

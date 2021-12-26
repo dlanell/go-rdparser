@@ -30,6 +30,9 @@ const (
 	CloseCurlyBrace               = "}"
 	OpenParentheses               = "("
 	CloseParentheses              = ")"
+	Identifier                    = "IDENTIFIER"
+	SimpleAssignment              = "SIMPLE_ASSIGNMENT"
+	ComplexAssignment             = "COMPLEX_ASSIGNMENT"
 	SkipToken                     = ""
 )
 
@@ -49,47 +52,56 @@ func (t *Tokenizer) isEOF() bool {
 	return t.cursor == len(t.text)
 }
 
-type Spec map[*regexp.Regexp]string
-
-var spec = Spec{
+var spec = [][]string{
 	//---------------------------------------------------
 	// Whitespace
 
-	regexp.MustCompile(`^\s+`): SkipToken,
+	{`^\s+`, SkipToken},
 
 	//---------------------------------------------------
 	// Comments
 
 	// skip single-line comment
-	regexp.MustCompile(`^//.*`): SkipToken,
+	{`^//.*`, SkipToken},
 	// skip multi-line comment
-	regexp.MustCompile(`^/\*[\s\S]*?\*/`): SkipToken,
+	{`^/\*[\s\S]*?\*/`, SkipToken},
 
 	//---------------------------------------------------
 	// Symbols, Delimiters
 
-	regexp.MustCompile(`^;`):  SemiColonToken,
-	regexp.MustCompile(`^{`):  OpenCurlyBrace,
-	regexp.MustCompile(`^}`):  CloseCurlyBrace,
-	regexp.MustCompile(`^\(`): OpenParentheses,
-	regexp.MustCompile(`^\)`): CloseParentheses,
-
-	//---------------------------------------------------
-	// Math operators +, -, *, /
-
-	regexp.MustCompile(`^[+|-]`): AdditiveOperator,
-	regexp.MustCompile(`^[*|/]`): MultiplicativeOperator,
+	{`^;`, SemiColonToken},
+	{`^{`, OpenCurlyBrace},
+	{`^}`, CloseCurlyBrace},
+	{`^\(`, OpenParentheses},
+	{`^\)`, CloseParentheses},
 
 	//---------------------------------------------------
 	// Numbers
 
-	regexp.MustCompile(`^\d+`): NumberToken,
+	{`^\d+`, NumberToken},
+
+	//---------------------------------------------------
+	// Identifiers
+
+	{`^\w+`, Identifier},
+
+	//---------------------------------------------------
+	// Assignment operators =, +=, -=, *=, /=
+
+	{`^=`, SimpleAssignment},
+	{`^[+\-*/]=`, ComplexAssignment},
+
+	//---------------------------------------------------
+	// Math operators +, -, *, /
+
+	{`^[+|-]`, AdditiveOperator},
+	{`^[*|/]`, MultiplicativeOperator},
 
 	//---------------------------------------------------
 	// Strings
 
-	regexp.MustCompile(`^"[^"]*"`): StringToken,
-	regexp.MustCompile(`^'[^']*'`): StringToken,
+	{`^"[^"]*"`, StringToken},
+	{`^'[^']*'`, StringToken},
 }
 
 func (t *Tokenizer) GetNextToken() (*Token, error) {
@@ -99,7 +111,10 @@ func (t *Tokenizer) GetNextToken() (*Token, error) {
 
 	characters := []byte(t.text)[t.cursor:]
 
-	for regex, tokenType := range spec {
+	for _, spec := range spec {
+		regexText := spec[0]
+		tokenType := spec[1]
+		regex := regexp.MustCompile(regexText)
 		tokenValue := t.match(regex, string(characters))
 		if tokenValue == "" {
 			continue

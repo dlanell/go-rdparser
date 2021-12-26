@@ -169,14 +169,6 @@ comment
 					Value:     `123`,
 				},
 			},
-			"given non numeric characters": {
-				tokenizerText: `abc`,
-				expectedError: errors.New("unexpected token: a"),
-			},
-			"given non numeric characters before number": {
-				tokenizerText: `a1`,
-				expectedError: errors.New("unexpected token: a"),
-			},
 			"given non numeric characters after number": {
 				tokenizerText: `1a`,
 				expectedToken: &Token{
@@ -300,5 +292,80 @@ comment
 				})
 			}
 		})
+	})
+	t.Run("Identifier", func(t *testing.T) {
+		tests := map[string]test{
+			"given windu": {
+				tokenizerText: `windu`,
+				expectedToken: &Token{
+					TokenType: Identifier,
+					Value:     `windu`,
+				},
+			},
+			"given windu123": {
+				tokenizerText: `windu123`,
+				expectedToken: &Token{
+					TokenType: Identifier,
+					Value:     `windu123`,
+				},
+			},
+		}
+
+		for name, tc := range tests {
+			t.Run(name, func(t *testing.T) {
+				tokenizer := New(Props{Text: tc.tokenizerText})
+				token, err := tokenizer.GetNextToken()
+				assert.Equal(t, tc.expectedToken, token)
+				assert.Equal(t, tc.expectedError, err)
+			})
+		}
+	})
+	t.Run("Assignment", func(t *testing.T) {
+		tests := map[string]test{
+			"given =": {
+				tokenizerText: `=`,
+				expectedToken: &Token{
+					TokenType: SimpleAssignment,
+					Value:     `=`,
+				},
+			},
+			"given +=": {
+				tokenizerText: `+=`,
+				expectedToken: &Token{
+					TokenType: ComplexAssignment,
+					Value:     `+=`,
+				},
+			},
+			"given -=": {
+				tokenizerText: `-=`,
+				expectedToken: &Token{
+					TokenType: ComplexAssignment,
+					Value:     `-=`,
+				},
+			},
+			"given *=": {
+				tokenizerText: `*=`,
+				expectedToken: &Token{
+					TokenType: ComplexAssignment,
+					Value:     `*=`,
+				},
+			},
+			"given /=": {
+				tokenizerText: `/=`,
+				expectedToken: &Token{
+					TokenType: ComplexAssignment,
+					Value:     `/=`,
+				},
+			},
+		}
+
+		for name, tc := range tests {
+			t.Run(name, func(t *testing.T) {
+				tokenizer := New(Props{Text: tc.tokenizerText})
+				token, err := tokenizer.GetNextToken()
+				assert.Equal(t, tc.expectedToken, token)
+				assert.Equal(t, tc.expectedError, err)
+			})
+		}
 	})
 }
