@@ -26,7 +26,7 @@ type test struct {
 
 func TestRun(t *testing.T) {
 	t.Run("Program", func(t *testing.T) {
-		t.Run("NumericLiteral", func(t *testing.T) {
+		t.Run("ExpressionStatement", func(t *testing.T) {
 			tests := map[string]test{
 				"given numbers": {
 					text: `123;`,
@@ -42,19 +42,6 @@ func TestRun(t *testing.T) {
 						}},
 					},
 				},
-			}
-
-			for name, tc := range tests {
-				t.Run(name, func(t *testing.T) {
-					parser := New(Props{Text: tc.text})
-					node, err := parser.Run()
-					assert.Equal(t, tc.expectedProgram, node)
-					assert.Equal(t, tc.expectedError, err)
-				})
-			}
-		})
-		t.Run("StringLiteral", func(t *testing.T) {
-			tests := map[string]test{
 				"given double quote string": {
 					text: `"sith";`,
 					expectedProgram: &Program{
@@ -84,19 +71,6 @@ func TestRun(t *testing.T) {
 						}},
 					},
 				},
-			}
-
-			for name, tc := range tests {
-				t.Run(name, func(t *testing.T) {
-					parser := New(Props{Text: tc.text})
-					node, err := parser.Run()
-					assert.Equal(t, tc.expectedProgram, node)
-					assert.Equal(t, tc.expectedError, err)
-				})
-			}
-		})
-		t.Run("ExpressionStatement", func(t *testing.T) {
-			tests := map[string]test{
 				"given string and numeric expression": {
 					text: `
 'sith';
@@ -120,6 +94,334 @@ func TestRun(t *testing.T) {
 									nodeType: NumericLiteral,
 									body: &NumericLiteralValue{
 										value: 42,
+									},
+								},
+							},
+						},
+					},
+				},
+			}
+
+			for name, tc := range tests {
+				t.Run(name, func(t *testing.T) {
+					parser := New(Props{Text: tc.text})
+					node, err := parser.Run()
+					assert.Equal(t, tc.expectedProgram, node)
+					assert.Equal(t, tc.expectedError, err)
+				})
+			}
+		})
+		t.Run("Math BinaryExpression", func(t *testing.T) {
+			tests := map[string]test{
+				"given 2 + 2": {
+					text: `2 + 2;`,
+					expectedProgram: &Program{
+						nodeType: ProgramEnum,
+						body: []*Node{
+							{
+								nodeType: ExpressionStatement,
+								body: &Node{
+									nodeType: BinaryExpression,
+									body: &BinaryExpressionNode{
+										operator: "+",
+										left: &Node{
+											nodeType: NumericLiteral,
+											body:     &NumericLiteralValue{2},
+										},
+										right: &Node{
+											nodeType: NumericLiteral,
+											body:     &NumericLiteralValue{2},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+				"given 2 * 2": {
+					text: `2 * 2;`,
+					expectedProgram: &Program{
+						nodeType: ProgramEnum,
+						body: []*Node{
+							{
+								nodeType: ExpressionStatement,
+								body: &Node{
+									nodeType: BinaryExpression,
+									body: &BinaryExpressionNode{
+										operator: "*",
+										left: &Node{
+											nodeType: NumericLiteral,
+											body:     &NumericLiteralValue{2},
+										},
+										right: &Node{
+											nodeType: NumericLiteral,
+											body:     &NumericLiteralValue{2},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+				"given chained additive operators 3 + 2 - 2": {
+					text: `3 + 2 - 2;`,
+					expectedProgram: &Program{
+						nodeType: ProgramEnum,
+						body: []*Node{
+							{
+								nodeType: ExpressionStatement,
+								body: &Node{
+									nodeType: BinaryExpression,
+									body: &BinaryExpressionNode{
+										operator: "-",
+										left: &Node{
+											nodeType: BinaryExpression,
+											body: &BinaryExpressionNode{
+												operator: "+",
+												left: &Node{
+													nodeType: NumericLiteral,
+													body:     &NumericLiteralValue{3},
+												},
+												right: &Node{
+													nodeType: NumericLiteral,
+													body:     &NumericLiteralValue{2},
+												},
+											},
+										},
+										right: &Node{
+											nodeType: NumericLiteral,
+											body:     &NumericLiteralValue{2},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+				"given chained additive operators with parentheses 3 + ( 2 - 2 )": {
+					text: `3 + ( 2 - 2 );`,
+					expectedProgram: &Program{
+						nodeType: ProgramEnum,
+						body: []*Node{
+							{
+								nodeType: ExpressionStatement,
+								body: &Node{
+									nodeType: BinaryExpression,
+									body: &BinaryExpressionNode{
+										operator: "+",
+										left: &Node{
+											nodeType: NumericLiteral,
+											body:     &NumericLiteralValue{3},
+										},
+										right: &Node{
+											nodeType: BinaryExpression,
+											body:     &BinaryExpressionNode{
+												operator: "-",
+												left: &Node{
+													nodeType: NumericLiteral,
+													body:     &NumericLiteralValue{2},
+												},
+												right: &Node{
+													nodeType: NumericLiteral,
+													body:     &NumericLiteralValue{2},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+				"given chained multiplicative operators 3 * 2 / 2": {
+					text: `3 * 2 / 2;`,
+					expectedProgram: &Program{
+						nodeType: ProgramEnum,
+						body: []*Node{
+							{
+								nodeType: ExpressionStatement,
+								body: &Node{
+									nodeType: BinaryExpression,
+									body: &BinaryExpressionNode{
+										operator: "/",
+										left: &Node{
+											nodeType: BinaryExpression,
+											body: &BinaryExpressionNode{
+												operator: "*",
+												left: &Node{
+													nodeType: NumericLiteral,
+													body:     &NumericLiteralValue{3},
+												},
+												right: &Node{
+													nodeType: NumericLiteral,
+													body:     &NumericLiteralValue{2},
+												},
+											},
+										},
+										right: &Node{
+											nodeType: NumericLiteral,
+											body:     &NumericLiteralValue{2},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+				"given chained multiplicative & additive operators 3 + 2 * 2": {
+					text: `3 + 2 * 2;`,
+					expectedProgram: &Program{
+						nodeType: ProgramEnum,
+						body: []*Node{
+							{
+								nodeType: ExpressionStatement,
+								body: &Node{
+									nodeType: BinaryExpression,
+									body: &BinaryExpressionNode{
+										operator: "+",
+										left: &Node{
+											nodeType: NumericLiteral,
+											body:     &NumericLiteralValue{3},
+										},
+										right: &Node{
+											nodeType: BinaryExpression,
+											body: &BinaryExpressionNode{
+												operator: "*",
+												left: &Node{
+													nodeType: NumericLiteral,
+													body:     &NumericLiteralValue{2},
+												},
+												right: &Node{
+													nodeType: NumericLiteral,
+													body:     &NumericLiteralValue{2},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+				"given chained multiplicative & additive operators with parentheses (3 + 2) * 2": {
+					text: `(3 + 2) * 2;`,
+					expectedProgram: &Program{
+						nodeType: ProgramEnum,
+						body: []*Node{
+							{
+								nodeType: ExpressionStatement,
+								body: &Node{
+									nodeType: BinaryExpression,
+									body: &BinaryExpressionNode{
+										operator: "*",
+										left: &Node{
+											nodeType: BinaryExpression,
+											body: &BinaryExpressionNode{
+												operator: "+",
+												left: &Node{
+													nodeType: NumericLiteral,
+													body:     &NumericLiteralValue{3},
+												},
+												right: &Node{
+													nodeType: NumericLiteral,
+													body:     &NumericLiteralValue{2},
+												},
+											},
+										},
+										right: &Node{
+											nodeType: NumericLiteral,
+											body:     &NumericLiteralValue{2},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+				"given 2 additive expressions": {
+					text: `
+2 + 2;
+35 + 24;
+`,
+					expectedProgram: &Program{
+						nodeType: ProgramEnum,
+						body: []*Node{
+							{
+								nodeType: ExpressionStatement,
+								body: &Node{
+									nodeType: BinaryExpression,
+									body: &BinaryExpressionNode{
+										operator: "+",
+										left: &Node{
+											nodeType: NumericLiteral,
+											body:     &NumericLiteralValue{2},
+										},
+										right: &Node{
+											nodeType: NumericLiteral,
+											body:     &NumericLiteralValue{2},
+										},
+									},
+								},
+							},
+							{
+								nodeType: ExpressionStatement,
+								body: &Node{
+									nodeType: BinaryExpression,
+									body: &BinaryExpressionNode{
+										operator: "+",
+										left: &Node{
+											nodeType: NumericLiteral,
+											body:     &NumericLiteralValue{35},
+										},
+										right: &Node{
+											nodeType: NumericLiteral,
+											body:     &NumericLiteralValue{24},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+				"given 2 multiplicative expressions": {
+					text: `
+2 * 2;
+35 / 24;
+`,
+					expectedProgram: &Program{
+						nodeType: ProgramEnum,
+						body: []*Node{
+							{
+								nodeType: ExpressionStatement,
+								body: &Node{
+									nodeType: BinaryExpression,
+									body: &BinaryExpressionNode{
+										operator: "*",
+										left: &Node{
+											nodeType: NumericLiteral,
+											body:     &NumericLiteralValue{2},
+										},
+										right: &Node{
+											nodeType: NumericLiteral,
+											body:     &NumericLiteralValue{2},
+										},
+									},
+								},
+							},
+							{
+								nodeType: ExpressionStatement,
+								body: &Node{
+									nodeType: BinaryExpression,
+									body: &BinaryExpressionNode{
+										operator: "/",
+										left: &Node{
+											nodeType: NumericLiteral,
+											body:     &NumericLiteralValue{35},
+										},
+										right: &Node{
+											nodeType: NumericLiteral,
+											body:     &NumericLiteralValue{24},
+										},
 									},
 								},
 							},
@@ -197,9 +499,9 @@ func TestRun(t *testing.T) {
 										nodeType: BlockStatement,
 										body: []*Node{{
 											nodeType: ExpressionStatement,
-											body:     &Node{
+											body: &Node{
 												nodeType: NumericLiteral,
-												body: &NumericLiteralValue{42},
+												body:     &NumericLiteralValue{42},
 											},
 										}},
 									},
@@ -215,7 +517,7 @@ func TestRun(t *testing.T) {
 						body: []*Node{
 							{
 								nodeType: BlockStatement,
-								body: []*Node{},
+								body:     []*Node{},
 							},
 						},
 					},
@@ -240,7 +542,7 @@ func TestRun(t *testing.T) {
 						body: []*Node{
 							{
 								nodeType: EmptyStatement,
-								body: nil,
+								body:     nil,
 							},
 						},
 					},

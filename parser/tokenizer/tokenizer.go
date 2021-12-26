@@ -21,12 +21,16 @@ type Token struct {
 }
 
 const (
-	NumberToken string = "NUMBER"
-	StringToken = "STRING"
-	SemiColonToken   = ";"
-	OpenCurlyBrace   = "{"
-	CloseCurlyBrace   = "}"
-	SkipToken   = ""
+	NumberToken            string = "NUMBER"
+	StringToken                   = "STRING"
+	SemiColonToken                = ";"
+	AdditiveOperator              = "+"
+	MultiplicativeOperator        = "*"
+	OpenCurlyBrace                = "{"
+	CloseCurlyBrace               = "}"
+	OpenParentheses               = "("
+	CloseParentheses              = ")"
+	SkipToken                     = ""
 )
 
 func New(props Props) *Tokenizer {
@@ -62,11 +66,19 @@ var spec = Spec{
 	regexp.MustCompile(`^/\*[\s\S]*?\*/`): SkipToken,
 
 	//---------------------------------------------------
-	// Symbols, Delimeters
+	// Symbols, Delimiters
 
-	regexp.MustCompile(`^;`): SemiColonToken,
-	regexp.MustCompile(`^{`): OpenCurlyBrace,
-	regexp.MustCompile(`^}`): CloseCurlyBrace,
+	regexp.MustCompile(`^;`):  SemiColonToken,
+	regexp.MustCompile(`^{`):  OpenCurlyBrace,
+	regexp.MustCompile(`^}`):  CloseCurlyBrace,
+	regexp.MustCompile(`^\(`): OpenParentheses,
+	regexp.MustCompile(`^\)`): CloseParentheses,
+
+	//---------------------------------------------------
+	// Math operators +, -, *, /
+
+	regexp.MustCompile(`^[+|-]`): AdditiveOperator,
+	regexp.MustCompile(`^[*|/]`): MultiplicativeOperator,
 
 	//---------------------------------------------------
 	// Numbers

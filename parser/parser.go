@@ -28,6 +28,12 @@ type Node struct {
 	body     interface{}
 }
 
+type BinaryExpressionNode struct {
+	operator string
+	left interface{}
+	right interface{}
+}
+
 type StringLiteralValue struct {
 	value string
 }
@@ -41,6 +47,7 @@ const (
 	StringLiteral  = "StringLiteral"
 	ExpressionStatement  = "ExpressionStatement"
 	BlockStatement  = "BlockStatement"
+	BinaryExpression  = "BinaryExpression"
 	EmptyStatement  = "EmptyStatement"
 	ProgramEnum     = "Program"
 )
@@ -173,10 +180,107 @@ func (p *Parser) ExpressionStatement() (*Node, error) {
 }
 
 // Expression
-//	: Literal
+//	: AdditiveExpression
 ///*
 func (p *Parser) Expression() (*Node, error) {
-	return p.Literal()
+	return p.AdditiveExpression()
+}
+
+// AdditiveExpression
+//	: MultiplicativeExpression
+//	| MultiplicativeExpression Additive_Operator AdditiveExpression
+///*
+func (p *Parser) AdditiveExpression() (*Node, error) {
+	left, err := p.MultiplicativeExpression()
+	if err != nil {
+		return nil, err
+	}
+
+	for p.lookAhead.TokenType == tokenizer.AdditiveOperator {
+		operator, operatorErr := p.eat(tokenizer.AdditiveOperator)
+		if operatorErr != nil {
+			return nil, operatorErr
+		}
+		right, rightErr := p.MultiplicativeExpression()
+		if rightErr != nil {
+			return nil, rightErr
+		}
+
+		left = &Node{
+			nodeType: BinaryExpression,
+			body: &BinaryExpressionNode{
+				operator: operator.Value,
+				left:     left,
+				right:    right,
+			},
+		}
+	}
+	return left, nil
+}
+
+// MultiplicativeExpression
+//	: PrimaryExpression
+//	| PrimaryExpression MultiplicativeOperator MultiplicativeExpression
+///*
+func (p *Parser) MultiplicativeExpression() (*Node, error) {
+	left, err := p.PrimaryExpression()
+	if err != nil {
+		return nil, err
+	}
+
+	for p.lookAhead.TokenType == tokenizer.MultiplicativeOperator {
+		operator, operatorErr := p.eat(tokenizer.MultiplicativeOperator)
+		if operatorErr != nil {
+			return nil, operatorErr
+		}
+		right, rightErr := p.PrimaryExpression()
+		if rightErr != nil {
+			return nil, rightErr
+		}
+
+		left = &Node{
+			nodeType: BinaryExpression,
+			body: &BinaryExpressionNode{
+				operator: operator.Value,
+				left:     left,
+				right:    right,
+			},
+		}
+	}
+	return left, nil
+}
+
+// PrimaryExpression
+//	: Literal
+//	| ParenthesizedExpression
+///*
+func (p *Parser) PrimaryExpression() (*Node, error) {
+	switch p.lookAhead.TokenType {
+	case tokenizer.OpenParentheses:
+		return p.ParenthesizedExpression()
+	default:
+		return p.Literal()
+	}
+}
+
+// ParenthesizedExpression
+//	: '(' Expression ')'
+//	;
+///*
+func (p *Parser) ParenthesizedExpression() (*Node, error) {
+	_, err := p.eat(tokenizer.OpenParentheses)
+	if err != nil {
+		return nil, err
+	}
+	expression, expressionErr := p.Expression()
+	if expressionErr != nil {
+		return nil, expressionErr
+	}
+	_, err = p.eat(tokenizer.CloseParentheses)
+	if err != nil {
+		return nil, err
+	}
+	return expression, nil
 }
 
 // Literal

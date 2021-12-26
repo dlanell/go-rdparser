@@ -48,6 +48,61 @@ func TestGetNextToken(t *testing.T) {
 					Value:     "}",
 				},
 			},
+			"given (": {
+				tokenizerText: `(`,
+				expectedToken: &Token{
+					TokenType: OpenParentheses,
+					Value:     "(",
+				},
+			},
+			"given )": {
+				tokenizerText: `)`,
+				expectedToken: &Token{
+					TokenType: CloseParentheses,
+					Value:     ")",
+				},
+			},
+		}
+
+		for name, tc := range tests {
+			t.Run(name, func(t *testing.T) {
+				tokenizer := New(Props{Text: tc.tokenizerText})
+				token, err := tokenizer.GetNextToken()
+				assert.Equal(t, tc.expectedToken, token)
+				assert.Equal(t, tc.expectedError, err)
+			})
+		}
+	})
+	t.Run("Math operators", func(t *testing.T) {
+		tests := map[string]test{
+			"given +": {
+				tokenizerText: `+`,
+				expectedToken: &Token{
+					TokenType: AdditiveOperator,
+					Value:     "+",
+				},
+			},
+			"given -": {
+				tokenizerText: `-`,
+				expectedToken: &Token{
+					TokenType: AdditiveOperator,
+					Value:     "-",
+				},
+			},
+			"given *": {
+				tokenizerText: `*`,
+				expectedToken: &Token{
+					TokenType: MultiplicativeOperator,
+					Value:     "*",
+				},
+			},
+			"given /": {
+				tokenizerText: `/`,
+				expectedToken: &Token{
+					TokenType: MultiplicativeOperator,
+					Value:     "/",
+				},
+			},
 		}
 
 		for name, tc := range tests {
