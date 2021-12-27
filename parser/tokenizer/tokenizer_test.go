@@ -384,6 +384,61 @@ comment
 					Value:     `let`,
 				},
 			},
+			"given if": {
+				tokenizerText: `if`,
+				expectedToken: &Token{
+					TokenType: IfKeyword,
+					Value:     `if`,
+				},
+			},
+			"given else": {
+				tokenizerText: `else`,
+				expectedToken: &Token{
+					TokenType: ElseKeyword,
+					Value:     `else`,
+				},
+			},
+		}
+
+		for name, tc := range tests {
+			t.Run(name, func(t *testing.T) {
+				tokenizer := New(Props{Text: tc.tokenizerText})
+				token, err := tokenizer.GetNextToken()
+				assert.Equal(t, tc.expectedToken, token)
+				assert.Equal(t, tc.expectedError, err)
+			})
+		}
+	})
+	t.Run("Relational Operator", func(t *testing.T) {
+		tests := map[string]test{
+			"given >": {
+				tokenizerText: `>`,
+				expectedToken: &Token{
+					TokenType: RelationalOperator,
+					Value:     `>`,
+				},
+			},
+			"given >=": {
+				tokenizerText: `>=`,
+				expectedToken: &Token{
+					TokenType: RelationalOperator,
+					Value:     `>=`,
+				},
+			},
+			"given <": {
+				tokenizerText: `<`,
+				expectedToken: &Token{
+					TokenType: RelationalOperator,
+					Value:     `<`,
+				},
+			},
+			"given <=": {
+				tokenizerText: `<=`,
+				expectedToken: &Token{
+					TokenType: RelationalOperator,
+					Value:     `<=`,
+				},
+			},
 		}
 
 		for name, tc := range tests {

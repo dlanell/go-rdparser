@@ -31,10 +31,13 @@ const (
 	OpenParentheses               = "("
 	CloseParentheses              = ")"
 	Comma                         = ","
+	RelationalOperator            = "RELATIONAL_OPERATOR"
 	Identifier                    = "IDENTIFIER"
 	SimpleAssignment              = "SIMPLE_ASSIGNMENT"
 	ComplexAssignment             = "COMPLEX_ASSIGNMENT"
 	LetKeyword                    = "let"
+	IfKeyword                     = "if"
+	ElseKeyword                   = "else"
 	SkipToken                     = ""
 )
 
@@ -82,6 +85,8 @@ var spec = [][]string{
 	// Keywords
 
 	{`^\blet\b`, LetKeyword},
+	{`^\bif\b`, IfKeyword},
+	{`^\belse\b`, ElseKeyword},
 
 	//---------------------------------------------------
 	// Numbers
@@ -104,6 +109,11 @@ var spec = [][]string{
 
 	{`^[+|-]`, AdditiveOperator},
 	{`^[*|/]`, MultiplicativeOperator},
+
+	//---------------------------------------------------
+	// Relational operators >, >=, <, <=
+
+	{`^[>|<]=?`, RelationalOperator},
 
 	//---------------------------------------------------
 	// Strings

@@ -29,14 +29,20 @@ type Node struct {
 }
 
 type BinaryExpressionNode struct {
-	operator string
-	left     interface{}
-	right    interface{}
+	Operator string
+	Left     interface{}
+	Right    interface{}
 }
 
 type VariableDeclarationValue struct {
-	id       *Node
-	init     *Node
+	Id   *Node
+	Init *Node
+}
+
+type IfStatementValue struct {
+	Test   *Node
+	Consequent *Node
+	Alternate *Node
 }
 
 type StringLiteralValue struct {
@@ -56,6 +62,7 @@ const (
 	BlockStatement              = "BlockStatement"
 	BinaryExpression            = "BinaryExpression"
 	EmptyStatement              = "EmptyStatement"
+	IfStatement                 = "IfStatement"
 	VariableStatement           = "VariableStatement"
 	VariableDeclaration         = "VariableDeclaration"
 	ProgramEnum                 = "Program"
@@ -123,6 +130,7 @@ func (p *Parser) StatementList(stopLookAhead string) ([]*Node, error) {
 //	| BlockStatement
 //	| EmptyStatement
 //	| VariableStatement
+//	| IfStatement
 ///*
 func (p *Parser) Statement() (*Node, error) {
 	switch p.lookAhead.TokenType {
@@ -132,9 +140,63 @@ func (p *Parser) Statement() (*Node, error) {
 		return p.BlockStatement()
 	case tokenizer.LetKeyword:
 		return p.VariableStatement()
+	case tokenizer.IfKeyword:
+		return p.IfStatement()
 	default:
 		return p.ExpressionStatement()
 	}
+}
+
+// IfStatement
+//	: 'if' '(' Expression ')' Statement
+//	| 'if' '(' Expression ')' Statement 'else' Statement
+///*
+func (p *Parser) IfStatement() (*Node, error) {
+	_, err := p.eat(tokenizer.IfKeyword)
+	if err != nil {
+		return nil, err
+	}
+	_, err = p.eat(tokenizer.OpenParentheses)
+	if err != nil {
+		return nil, err
+	}
+
+	test, testErr := p.Expression()
+	if testErr != nil {
+		return nil, testErr
+	}
+
+	_, err = p.eat(tokenizer.CloseParentheses)
+	if err != nil {
+		return nil, err
+	}
+
+	consequent, consequentErr := p.Statement()
+	if consequentErr != nil {
+		return nil, consequentErr
+	}
+
+	var alternate *Node
+	var alternateErr error
+	if p.lookAhead != nil && p.lookAhead.TokenType == tokenizer.ElseKeyword {
+		_, err = p.eat(tokenizer.ElseKeyword)
+		if err != nil {
+			return nil, err
+		}
+		alternate, alternateErr = p.Statement()
+		if alternateErr != nil {
+			return nil, alternateErr
+		}
+	}
+
+	return &Node{
+		NodeType: IfStatement,
+		Body:     &IfStatementValue{
+			Test:       test,
+			Consequent: consequent,
+			Alternate:  alternate,
+		},
+	}, nil
 }
 
 // VariableStatement
@@ -202,9 +264,9 @@ func (p *Parser) VariableDeclaration() (*Node, error) {
 
 	return &Node{
 		NodeType: VariableDeclaration,
-		Body:     &VariableDeclarationValue{
-			id:   identifier,
-			init: init,
+		Body: &VariableDeclarationValue{
+			Id:   identifier,
+			Init: init,
 		},
 	}, nil
 }
@@ -283,11 +345,11 @@ func (p *Parser) Expression() (*Node, error) {
 }
 
 // AssignmentExpression
-//	: AdditiveExpression
+//	: RelationalExpression
 //	| LeftHandSideExpression AssignmentOperator AssignmentExpression
 ///*
 func (p *Parser) AssignmentExpression() (*Node, error) {
-	left, err := p.AdditiveExpression()
+	left, err := p.RelationalExpression()
 	if err != nil {
 		return nil, err
 	}
@@ -314,9 +376,9 @@ func (p *Parser) AssignmentExpression() (*Node, error) {
 	return &Node{
 		NodeType: AssignmentExpression,
 		Body: &BinaryExpressionNode{
-			operator: assignmentOperatorToken.Value,
-			left:     leftNode,
-			right:    rightNode,
+			Operator: assignmentOperatorToken.Value,
+			Left:     leftNode,
+			Right:    rightNode,
 		},
 	}, nil
 }
@@ -350,7 +412,7 @@ func checkValidAssignmentTarget(node *Node) (*Node, error) {
 	if node.NodeType == Identifier {
 		return node, nil
 	}
-	return nil, errors.New("invalid left-hand side in assignment expression")
+	return nil, errors.New("invalid Left-hand side in assignment expression")
 }
 
 // AssignmentOperator
@@ -362,6 +424,14 @@ func (p *Parser) AssignmentOperator() (*tokenizer.Token, error) {
 		return p.eat(tokenizer.SimpleAssignment)
 	}
 	return p.eat(tokenizer.ComplexAssignment)
+}
+
+// RelationalExpression
+//	: AdditiveExpression
+//	| AdditiveExpression RELATIONAL_OPERATOR RelationalExpression
+///*
+func (p *Parser) RelationalExpression() (*Node, error) {
+	return p.genericBinaryExpression(p.AdditiveExpression, tokenizer.RelationalOperator)
 }
 
 // AdditiveExpression
@@ -399,9 +469,9 @@ func (p *Parser) genericBinaryExpression(expression func() (*Node, error), opera
 		left = &Node{
 			NodeType: BinaryExpression,
 			Body: &BinaryExpressionNode{
-				operator: operator.Value,
-				left:     left,
-				right:    right,
+				Operator: operator.Value,
+				Left:     left,
+				Right:    right,
 			},
 		}
 	}
