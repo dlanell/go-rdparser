@@ -32,12 +32,16 @@ const (
 	CloseParentheses              = ")"
 	Comma                         = ","
 	RelationalOperator            = "RELATIONAL_OPERATOR"
+	EqualityOperator              = "EQUALITY_OPERATOR"
 	Identifier                    = "IDENTIFIER"
 	SimpleAssignment              = "SIMPLE_ASSIGNMENT"
 	ComplexAssignment             = "COMPLEX_ASSIGNMENT"
 	LetKeyword                    = "let"
 	IfKeyword                     = "if"
 	ElseKeyword                   = "else"
+	TrueKeyword                   = "true"
+	FalseKeyword                  = "false"
+	NullKeyword                   = "null"
 	SkipToken                     = ""
 )
 
@@ -87,6 +91,9 @@ var spec = [][]string{
 	{`^\blet\b`, LetKeyword},
 	{`^\bif\b`, IfKeyword},
 	{`^\belse\b`, ElseKeyword},
+	{`^\btrue\b`, TrueKeyword},
+	{`^\bfalse\b`, FalseKeyword},
+	{`^\bnull\b`, NullKeyword},
 
 	//---------------------------------------------------
 	// Numbers
@@ -97,6 +104,11 @@ var spec = [][]string{
 	// Identifiers
 
 	{`^\w+`, Identifier},
+
+	//---------------------------------------------------
+	// Equality Operator
+
+	{`^[=!]=`, EqualityOperator},
 
 	//---------------------------------------------------
 	// Assignment operators =, +=, -=, *=, /=

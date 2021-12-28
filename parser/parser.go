@@ -40,9 +40,9 @@ type VariableDeclarationValue struct {
 }
 
 type IfStatementValue struct {
-	Test   *Node
+	Test       *Node
 	Consequent *Node
-	Alternate *Node
+	Alternate  *Node
 }
 
 type StringLiteralValue struct {
@@ -56,6 +56,8 @@ type NumericLiteralValue struct {
 const (
 	NumericLiteral       string = "NumericLiteral"
 	StringLiteral               = "StringLiteral"
+	BooleanLiteral              = "BooleanLiteral"
+	NullLiteral                 = "NullLiteral"
 	Identifier                  = "IDENTIFIER"
 	ExpressionStatement         = "ExpressionStatement"
 	AssignmentExpression        = "AssignmentExpression"
@@ -191,7 +193,7 @@ func (p *Parser) IfStatement() (*Node, error) {
 
 	return &Node{
 		NodeType: IfStatement,
-		Body:     &IfStatementValue{
+		Body: &IfStatementValue{
 			Test:       test,
 			Consequent: consequent,
 			Alternate:  alternate,
@@ -345,11 +347,11 @@ func (p *Parser) Expression() (*Node, error) {
 }
 
 // AssignmentExpression
-//	: RelationalExpression
-//	| LeftHandSideExpression AssignmentOperator AssignmentExpression
+//	: EqualityExpression
+//	| LeftHandSideExpression AssignmentOperator EqualityExpression
 ///*
 func (p *Parser) AssignmentExpression() (*Node, error) {
-	left, err := p.RelationalExpression()
+	left, err := p.EqualityExpression()
 	if err != nil {
 		return nil, err
 	}
@@ -426,6 +428,14 @@ func (p *Parser) AssignmentOperator() (*tokenizer.Token, error) {
 	return p.eat(tokenizer.ComplexAssignment)
 }
 
+// EqualityExpression
+//	: RelationalExpression
+//	| RelationalExpression RELATIONAL_OPERATOR EqualityExpression
+///*
+func (p *Parser) EqualityExpression() (*Node, error) {
+	return p.genericBinaryExpression(p.RelationalExpression, tokenizer.EqualityOperator)
+}
+
 // RelationalExpression
 //	: AdditiveExpression
 //	| AdditiveExpression RELATIONAL_OPERATOR RelationalExpression
@@ -496,7 +506,11 @@ func (p *Parser) PrimaryExpression() (*Node, error) {
 }
 
 func isLiteral(tokenType string) bool {
-	return tokenType == tokenizer.StringToken || tokenType == tokenizer.NumberToken
+	return tokenType == tokenizer.StringToken ||
+		tokenType == tokenizer.NumberToken ||
+		tokenType == tokenizer.TrueKeyword ||
+		tokenType == tokenizer.FalseKeyword ||
+		tokenType == tokenizer.NullKeyword
 }
 
 // ParenthesizedExpression
@@ -529,6 +543,12 @@ func (p *Parser) Literal() (*Node, error) {
 		return p.NumericLiteral()
 	case tokenizer.StringToken:
 		return p.StringLiteral()
+	case tokenizer.TrueKeyword:
+		return p.BooleanLiteral(true)
+	case tokenizer.FalseKeyword:
+		return p.BooleanLiteral(false)
+	case tokenizer.NullKeyword:
+		return p.NullLiteral()
 	}
 	return nil, fmt.Errorf("Unexpected token: %s\n", p.lookAhead.TokenType)
 }
@@ -560,6 +580,38 @@ func (p *Parser) StringLiteral() (*Node, error) {
 	}
 
 	return &Node{NodeType: StringLiteral, Body: &StringLiteralValue{token.Value[1 : len(token.Value)-1]}}, nil
+}
+
+// BooleanLiteral
+//	: 'true'
+//	| 'false'
+///*
+func (p *Parser) BooleanLiteral(value bool) (*Node, error) {
+	token, tokenErr := p.eat(getBooleanToken(value))
+	if tokenErr != nil {
+		return nil, tokenErr
+	}
+
+	return &Node{NodeType: BooleanLiteral, Body: &StringLiteralValue{token.Value}}, nil
+}
+
+// NullLiteral
+//	: 'null'
+///*
+func (p *Parser) NullLiteral() (*Node, error) {
+	token, tokenErr := p.eat(tokenizer.NullKeyword)
+	if tokenErr != nil {
+		return nil, tokenErr
+	}
+
+	return &Node{NodeType: NullLiteral, Body: &StringLiteralValue{token.Value}}, nil
+}
+
+func getBooleanToken(value bool) string {
+	if value {
+		return tokenizer.TrueKeyword
+	}
+	return tokenizer.FalseKeyword
 }
 
 func (p *Parser) eat(tokenType string) (*tokenizer.Token, error) {

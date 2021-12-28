@@ -398,6 +398,27 @@ comment
 					Value:     `else`,
 				},
 			},
+			"given true": {
+				tokenizerText: `true`,
+				expectedToken: &Token{
+					TokenType: TrueKeyword,
+					Value:     `true`,
+				},
+			},
+			"given false": {
+				tokenizerText: `false`,
+				expectedToken: &Token{
+					TokenType: FalseKeyword,
+					Value:     `false`,
+				},
+			},
+			"given null": {
+				tokenizerText: `null`,
+				expectedToken: &Token{
+					TokenType: NullKeyword,
+					Value:     `null`,
+				},
+			},
 		}
 
 		for name, tc := range tests {
@@ -437,6 +458,33 @@ comment
 				expectedToken: &Token{
 					TokenType: RelationalOperator,
 					Value:     `<=`,
+				},
+			},
+		}
+
+		for name, tc := range tests {
+			t.Run(name, func(t *testing.T) {
+				tokenizer := New(Props{Text: tc.tokenizerText})
+				token, err := tokenizer.GetNextToken()
+				assert.Equal(t, tc.expectedToken, token)
+				assert.Equal(t, tc.expectedError, err)
+			})
+		}
+	})
+	t.Run("Equality Operator", func(t *testing.T) {
+		tests := map[string]test{
+			"given ==": {
+				tokenizerText: `==`,
+				expectedToken: &Token{
+					TokenType: EqualityOperator,
+					Value:     `==`,
+				},
+			},
+			"given !=": {
+				tokenizerText: `!=`,
+				expectedToken: &Token{
+					TokenType: EqualityOperator,
+					Value:     `!=`,
 				},
 			},
 		}

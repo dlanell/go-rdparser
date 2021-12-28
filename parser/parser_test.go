@@ -27,7 +27,7 @@ type test struct {
 
 func TestRun(t *testing.T) {
 	t.Run("Program", func(t *testing.T) {
-		t.Run("ExpressionStatement", func(t *testing.T) {
+		t.Run("Literals", func(t *testing.T) {
 			tests := map[string]test{
 				"given numbers": {
 					text: `123;`,
@@ -99,6 +99,51 @@ func TestRun(t *testing.T) {
 								},
 							},
 						},
+					},
+				},
+				"given true keyword": {
+					text: `true;`,
+					expectedProgram: &Program{
+						NodeType: ProgramEnum,
+						Body: []*Node{{
+							NodeType: ExpressionStatement,
+							Body: &Node{
+								NodeType: BooleanLiteral,
+								Body: &StringLiteralValue{
+									Value: "true",
+								},
+							},
+						}},
+					},
+				},
+				"given false keyword": {
+					text: `false;`,
+					expectedProgram: &Program{
+						NodeType: ProgramEnum,
+						Body: []*Node{{
+							NodeType: ExpressionStatement,
+							Body: &Node{
+								NodeType: BooleanLiteral,
+								Body: &StringLiteralValue{
+									Value: "false",
+								},
+							},
+						}},
+					},
+				},
+				"given null keyword": {
+					text: `null;`,
+					expectedProgram: &Program{
+						NodeType: ProgramEnum,
+						Body: []*Node{{
+							NodeType: ExpressionStatement,
+							Body: &Node{
+								NodeType: NullLiteral,
+								Body: &StringLiteralValue{
+									Value: "null",
+								},
+							},
+						}},
 					},
 				},
 			}
@@ -1022,7 +1067,7 @@ if (x) {
 		})
 		t.Run("RelationalExpression", func(t *testing.T) {
 			tests := map[string]test{
-				"given valid if else statement with literal as test": {
+				"given valid if else statement with x + 5 > 10 as test": {
 					text: `
 
 if (x + 5 > 10) {
@@ -1104,6 +1149,147 @@ if (x + 5 > 10) {
 													},
 												},
 											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			}
+
+			for name, tc := range tests {
+				t.Run(name, func(t *testing.T) {
+					parser := New(Props{Text: tc.text})
+					node, err := parser.Run()
+					assert.Equal(t, tc.expectedProgram, node)
+					assert.Equal(t, tc.expectedError, err)
+				})
+			}
+		})
+		t.Run("EqualityExpression", func(t *testing.T) {
+			tests := map[string]test{
+				"given valid if else statement with x + 5 == 10 as test": {
+					text: `
+
+if (x + 5 == 10) {
+  x = 1;
+} else {
+  x = 2;
+}
+
+`,
+					expectedProgram: &Program{
+						NodeType: ProgramEnum,
+						Body: []*Node{
+							{
+								NodeType: IfStatement,
+								Body: &IfStatementValue{
+									Test: &Node{
+										NodeType: BinaryExpression,
+										Body:     &BinaryExpressionNode{
+											Operator: `==`,
+											Left: &Node{
+												NodeType: BinaryExpression,
+												Body:     &BinaryExpressionNode{
+													Operator: `+`,
+													Left: &Node{
+														NodeType: Identifier,
+														Body:     &StringLiteralValue{`x`},
+													},
+													Right: &Node{
+														NodeType: NumericLiteral,
+														Body:     &NumericLiteralValue{5},
+													},
+												},
+											},
+											Right: &Node{
+												NodeType: NumericLiteral,
+												Body:     &NumericLiteralValue{10},
+											},
+										},
+									},
+									Consequent: &Node{
+										NodeType: BlockStatement,
+										Body: []*Node{
+											{
+												NodeType: ExpressionStatement,
+												Body: &Node{
+													NodeType: AssignmentExpression,
+													Body:     &BinaryExpressionNode{
+														Operator: "=",
+														Left: &Node{
+															NodeType: Identifier,
+															Body:     &StringLiteralValue{"x"},
+														},
+														Right: &Node{
+															NodeType: NumericLiteral,
+															Body:     &NumericLiteralValue{1},
+														},
+													},
+												},
+											},
+										},
+									},
+									Alternate: &Node{
+										NodeType: BlockStatement,
+										Body: []*Node{
+											{
+												NodeType: ExpressionStatement,
+												Body: &Node{
+													NodeType: AssignmentExpression,
+													Body:     &BinaryExpressionNode{
+														Operator: "=",
+														Left: &Node{
+															NodeType: Identifier,
+															Body:     &StringLiteralValue{"x"},
+														},
+														Right: &Node{
+															NodeType: NumericLiteral,
+															Body:     &NumericLiteralValue{2},
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+				"given x > 5 == true;": {
+					text: `
+
+x > 5 == true;
+
+`,
+					expectedProgram: &Program{
+						NodeType: ProgramEnum,
+						Body: []*Node{
+							{
+								NodeType: ExpressionStatement,
+								Body: &Node{
+									NodeType: BinaryExpression,
+									Body:     &BinaryExpressionNode{
+										Operator: `==`,
+										Left: &Node{
+											NodeType: BinaryExpression,
+											Body:     &BinaryExpressionNode{
+												Operator: `>`,
+												Left: &Node{
+													NodeType: Identifier,
+													Body:     &StringLiteralValue{`x`},
+												},
+												Right: &Node{
+													NodeType: NumericLiteral,
+													Body:     &NumericLiteralValue{5},
+												},
+											},
+										},
+										Right: &Node{
+											NodeType: BooleanLiteral,
+											Body:     &StringLiteralValue{"true"},
 										},
 									},
 								},
