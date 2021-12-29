@@ -32,6 +32,8 @@ const (
 	CloseParentheses              = ")"
 	Comma                         = ","
 	RelationalOperator            = "RELATIONAL_OPERATOR"
+	LogicalAnd                    = "LOGICAL_AND"
+	LogicalOr                     = "LOGICAL_Or"
 	EqualityOperator              = "EQUALITY_OPERATOR"
 	Identifier                    = "IDENTIFIER"
 	SimpleAssignment              = "SIMPLE_ASSIGNMENT"
@@ -99,6 +101,12 @@ var spec = [][]string{
 	// Numbers
 
 	{`^\d+`, NumberToken},
+
+	//---------------------------------------------------
+	// Logical operators &&, ||, AND, OR
+
+	{`^(&&|\bAND\b)`, LogicalAnd},
+	{`^(\|\||\bOR\b)`, LogicalOr},
 
 	//---------------------------------------------------
 	// Identifiers

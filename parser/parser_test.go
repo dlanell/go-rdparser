@@ -1308,5 +1308,136 @@ x > 5 == true;
 				})
 			}
 		})
+		t.Run("LogicalExpressions", func(t *testing.T) {
+			tests := map[string]test{
+				"given x > 5 && y == 6;": {
+					text: `
+
+x > 5 && y == 6;
+
+`,
+					expectedProgram: &Program{
+						NodeType: ProgramEnum,
+						Body: []*Node{
+							{
+								NodeType: ExpressionStatement,
+								Body: &Node{
+									NodeType: BinaryExpression,
+									Body:     &BinaryExpressionNode{
+										Operator: `&&`,
+										Left: &Node{
+											NodeType: BinaryExpression,
+											Body:     &BinaryExpressionNode{
+												Operator: `>`,
+												Left: &Node{
+													NodeType: Identifier,
+													Body:     &StringLiteralValue{`x`},
+												},
+												Right: &Node{
+													NodeType: NumericLiteral,
+													Body:     &NumericLiteralValue{5},
+												},
+											},
+										},
+										Right: &Node{
+											NodeType: BinaryExpression,
+											Body:     &BinaryExpressionNode{
+												Operator: `==`,
+												Left: &Node{
+													NodeType: Identifier,
+													Body:     &StringLiteralValue{`y`},
+												},
+												Right: &Node{
+													NodeType: NumericLiteral,
+													Body:     &NumericLiteralValue{6},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+				"given x > 5 || y == 6 && z != 6;": {
+					text: `
+
+x > 5 || y == 6 && z != 6;
+
+`,
+					expectedProgram: &Program{
+						NodeType: ProgramEnum,
+						Body: []*Node{
+							{
+								NodeType: ExpressionStatement,
+								Body: &Node{
+									NodeType: BinaryExpression,
+									Body:     &BinaryExpressionNode{
+										Operator: `&&`,
+										Left: &Node{
+											NodeType: BinaryExpression,
+											Body:     &BinaryExpressionNode{
+												Operator: `||`,
+												Left: &Node{
+													NodeType: BinaryExpression,
+													Body:     &BinaryExpressionNode{
+														Operator: `>`,
+														Left: &Node{
+															NodeType: Identifier,
+															Body:     &StringLiteralValue{`x`},
+														},
+														Right: &Node{
+															NodeType: NumericLiteral,
+															Body:     &NumericLiteralValue{5},
+														},
+													},
+												},
+												Right: &Node{
+													NodeType: BinaryExpression,
+													Body:     &BinaryExpressionNode{
+														Operator: `==`,
+														Left: &Node{
+															NodeType: Identifier,
+															Body:     &StringLiteralValue{`y`},
+														},
+														Right: &Node{
+															NodeType: NumericLiteral,
+															Body:     &NumericLiteralValue{6},
+														},
+													},
+												},
+											},
+										},
+										Right: &Node{
+											NodeType: BinaryExpression,
+											Body:     &BinaryExpressionNode{
+												Operator: `!=`,
+												Left: &Node{
+													NodeType: Identifier,
+													Body:     &StringLiteralValue{`z`},
+												},
+												Right: &Node{
+													NodeType: NumericLiteral,
+													Body:     &NumericLiteralValue{6},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			}
+
+			for name, tc := range tests {
+				t.Run(name, func(t *testing.T) {
+					parser := New(Props{Text: tc.text})
+					node, err := parser.Run()
+					assert.Equal(t, tc.expectedProgram, node)
+					assert.Equal(t, tc.expectedError, err)
+				})
+			}
+		})
 	})
 }

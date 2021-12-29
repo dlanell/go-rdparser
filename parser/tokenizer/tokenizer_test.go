@@ -498,4 +498,45 @@ comment
 			})
 		}
 	})
+	t.Run("Relational Operator", func(t *testing.T) {
+		tests := map[string]test{
+			"given &&": {
+				tokenizerText: `&&`,
+				expectedToken: &Token{
+					TokenType: LogicalAnd,
+					Value:     `&&`,
+				},
+			},
+			"given ||": {
+				tokenizerText: `||`,
+				expectedToken: &Token{
+					TokenType: LogicalOr,
+					Value:     `||`,
+				},
+			},
+			"given AND": {
+				tokenizerText: `AND`,
+				expectedToken: &Token{
+					TokenType: LogicalAnd,
+					Value:     `AND`,
+				},
+			},
+			"given OR": {
+				tokenizerText: `OR`,
+				expectedToken: &Token{
+					TokenType: LogicalOr,
+					Value:     `OR`,
+				},
+			},
+		}
+
+		for name, tc := range tests {
+			t.Run(name, func(t *testing.T) {
+				tokenizer := New(Props{Text: tc.tokenizerText})
+				token, err := tokenizer.GetNextToken()
+				assert.Equal(t, tc.expectedToken, token)
+				assert.Equal(t, tc.expectedError, err)
+			})
+		}
+	})
 }

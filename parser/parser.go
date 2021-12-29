@@ -347,11 +347,11 @@ func (p *Parser) Expression() (*Node, error) {
 }
 
 // AssignmentExpression
-//	: EqualityExpression
+//	: LogicalAndExpression
 //	| LeftHandSideExpression AssignmentOperator EqualityExpression
 ///*
 func (p *Parser) AssignmentExpression() (*Node, error) {
-	left, err := p.EqualityExpression()
+	left, err := p.LogicalAndExpression()
 	if err != nil {
 		return nil, err
 	}
@@ -426,6 +426,22 @@ func (p *Parser) AssignmentOperator() (*tokenizer.Token, error) {
 		return p.eat(tokenizer.SimpleAssignment)
 	}
 	return p.eat(tokenizer.ComplexAssignment)
+}
+
+// LogicalAndExpression
+//	: LogicalOrExpression
+//	| LogicalOrExpression LOGICAL_AND LogicalAndExpression
+///*
+func (p *Parser) LogicalAndExpression() (*Node, error) {
+	return p.genericBinaryExpression(p.LogicalOrExpression, tokenizer.LogicalAnd)
+}
+
+// LogicalOrExpression
+//	: EqualityExpression
+//	| EqualityExpression LOGICAL_OR LogicalOrExpression
+///*
+func (p *Parser) LogicalOrExpression() (*Node, error) {
+	return p.genericBinaryExpression(p.EqualityExpression, tokenizer.LogicalOr)
 }
 
 // EqualityExpression
