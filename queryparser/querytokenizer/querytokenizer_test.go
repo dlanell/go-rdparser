@@ -97,6 +97,37 @@ func TestGetNextToken(t *testing.T) {
 			})
 		}
 	})
+	t.Run("BooleanToken", func(t *testing.T) {
+		tests := map[string]test{
+			"given empty string": {
+				tokenizerText: ``,
+				expectedError: errors.New("no tokens present"),
+			},
+			"given true": {
+				tokenizerText: `true`,
+				expectedToken: &Token{
+					TokenType: BooleanToken,
+					Value:     `true`,
+				},
+			},
+			"given false": {
+				tokenizerText: `    false    `,
+				expectedToken: &Token{
+					TokenType: BooleanToken,
+					Value:     `false`,
+				},
+			},
+		}
+
+		for name, tc := range tests {
+			t.Run(name, func(t *testing.T) {
+				tokenizer := New(Props{Text: tc.tokenizerText})
+				token, err := tokenizer.GetNextToken()
+				assert.Equal(t, tc.expectedToken, token)
+				assert.Equal(t, tc.expectedError, err)
+			})
+		}
+	})
 	t.Run("StringToken", func(t *testing.T) {
 		t.Run("double quote strings", func(t *testing.T) {
 			tests := map[string]test{

@@ -23,6 +23,7 @@ type Token struct {
 const (
 	NumberToken        string = "NUMBER"
 	StringToken               = "STRING"
+	BooleanToken              = "BOOLEAN"
 	OpenParentheses           = "("
 	CloseParentheses          = ")"
 	Comma                     = ","
@@ -81,6 +82,11 @@ var spec = [][]string{
 	// logical operators and, or
 
 	{`^(\band\b|\bor\b)`, LogicalOperator},
+
+	//---------------------------------------------------
+	// Boolean value: true, false
+
+	{`^(\btrue\b|\bfalse\b)`, BooleanToken},
 
 	//---------------------------------------------------
 	// Identifiers

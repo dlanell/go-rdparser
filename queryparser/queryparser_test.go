@@ -57,6 +57,39 @@ func TestRun(t *testing.T) {
 				})
 			}
 		})
+		t.Run("Boolean Literals", func(t *testing.T) {
+			tests := map[string]test{
+				"given true": {
+					text: `true`,
+					expectedProgram: &Program{
+						NodeType: ProgramEnum,
+						Body: &Node{
+							NodeType: BooleanLiteral,
+							Body: &BooleanLiteralValue{true},
+						},
+					},
+				},
+				"given false": {
+					text: `false`,
+					expectedProgram: &Program{
+						NodeType: ProgramEnum,
+						Body: &Node{
+							NodeType: BooleanLiteral,
+							Body: &BooleanLiteralValue{false},
+						},
+					},
+				},
+			}
+
+			for name, tc := range tests {
+				t.Run(name, func(t *testing.T) {
+					parser := New(Props{Text: tc.text})
+					node, err := parser.Run()
+					assert.Equal(t, tc.expectedProgram, node)
+					assert.Equal(t, tc.expectedError, err)
+				})
+			}
+		})
 		t.Run("String Literals", func(t *testing.T) {
 			tests := map[string]test{
 				"given double quote string": {
@@ -180,7 +213,7 @@ func TestRun(t *testing.T) {
 						},
 					},
 					"given literals & functions": {
-						text: `and(or(eq(path, "sith"), eq(name, "revan")), lt(count, 2), "star wars", 3)`,
+						text: `and(or(eq(path, "sith"), eq(name, "revan")), lt(count, 2), "star wars", 3, true)`,
 						expectedProgram: &Program{
 							NodeType: ProgramEnum,
 							Body: &Node{
@@ -251,6 +284,10 @@ func TestRun(t *testing.T) {
 										{
 											NodeType: NumericLiteral,
 											Body:     &NumericLiteralValue{3},
+										},
+										{
+											NodeType: BooleanLiteral,
+											Body:     &BooleanLiteralValue{true},
 										},
 									},
 								},
@@ -349,7 +386,7 @@ func TestRun(t *testing.T) {
 						},
 					},
 					"given literals & functions": {
-						text: `or(and(eq(path, "sith"), eq(name, "revan")), lt(count, 2), "star wars", 3)`,
+						text: `or(and(eq(path, "sith"), eq(name, "revan")), lt(count, 2), "star wars", 3, true)`,
 						expectedProgram: &Program{
 							NodeType: ProgramEnum,
 							Body: &Node{
@@ -420,6 +457,10 @@ func TestRun(t *testing.T) {
 										{
 											NodeType: NumericLiteral,
 											Body:     &NumericLiteralValue{3},
+										},
+										{
+											NodeType: BooleanLiteral,
+											Body:     &BooleanLiteralValue{true},
 										},
 									},
 								},

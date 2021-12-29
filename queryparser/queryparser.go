@@ -38,13 +38,16 @@ Identifier
 	: IDENTIFIER
 
 Literal
-	: NumericLiteral | StringLiteral
+	: NumericLiteral | StringLiteral | BooleanLiteral
 
 NumericLiteral
 	: NUMBER
 
 StringLiteral
 	: STRING
+
+BooleanLiteral
+	: true | false
 
 */
 
@@ -73,6 +76,10 @@ type FunctionNode struct {
 	Arguments []*Node
 }
 
+type BooleanLiteralValue struct {
+	Value bool
+}
+
 type StringLiteralValue struct {
 	Value string
 }
@@ -86,6 +93,7 @@ const (
 	Identifier                = "Identifier"
 	NumericLiteral            = "NumericLiteral"
 	StringLiteral             = "StringLiteral"
+	BooleanLiteral             = "BooleanLiteral"
 	LogicalFunction           = "LogicalFunction"
 	RelationalFunction        = "RelationalFunction"
 )
@@ -274,11 +282,13 @@ func (q *QueryParser) Arguments() ([]*Node, error) {
 }
 
 // Literal
-//	: NumericLiteral | StringLiteral
+//	: NumericLiteral | StringLiteral | BooleanLiteral
 //	;
 ///*
 func (q *QueryParser) Literal() (*Node, error) {
 	switch q.lookAhead.TokenType {
+	case querytokenizer.BooleanToken:
+		return q.BooleanLiteral()
 	case querytokenizer.NumberToken:
 		return q.NumericLiteral()
 	case querytokenizer.StringToken:
@@ -314,6 +324,23 @@ func (q *QueryParser) StringLiteral() (*Node, error) {
 	}
 
 	return &Node{NodeType: StringLiteral, Body: &StringLiteralValue{token.Value[1 : len(token.Value)-1]}}, nil
+}
+
+// BooleanLiteral
+//	: true | false
+///*
+func (q *QueryParser) BooleanLiteral() (*Node, error) {
+	token, tokenErr := q.eat(querytokenizer.BooleanToken)
+	if tokenErr != nil {
+		return nil, tokenErr
+	}
+
+	value, valueErr := strconv.ParseBool(token.Value)
+	if valueErr != nil {
+		return nil, valueErr
+	}
+
+	return &Node{NodeType: BooleanLiteral, Body: &BooleanLiteralValue{value}}, nil
 }
 
 // Identifier
