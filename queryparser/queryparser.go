@@ -52,7 +52,6 @@ BooleanLiteral
 */
 
 type QueryParser struct {
-	text      string
 	lookAhead *querytokenizer.Token
 	tokenizer *querytokenizer.Tokenizer
 }
@@ -93,20 +92,31 @@ const (
 	Identifier                = "Identifier"
 	NumericLiteral            = "NumericLiteral"
 	StringLiteral             = "StringLiteral"
-	BooleanLiteral             = "BooleanLiteral"
+	BooleanLiteral            = "BooleanLiteral"
 	LogicalFunction           = "LogicalFunction"
 	RelationalFunction        = "RelationalFunction"
 )
 
-func New(props Props) *QueryParser {
+const (
+	EqualOperator              string = "eq"
+	NotEqualOperator                  = "ne"
+	GreaterThanOperator               = "gt"
+	GreaterThanOrEqualOperator        = "ge"
+	LessThanOperator                  = "lt"
+	LessThanOrEqualOperator           = "le"
+	LogicalOrOperator                 = "or"
+	LogicalAndOperator                = "and"
+)
+
+func New() *QueryParser {
 	return &QueryParser{
-		text:      props.Text,
-		tokenizer: querytokenizer.New(querytokenizer.Props{Text: props.Text}),
+		tokenizer: nil,
 		lookAhead: nil,
 	}
 }
 
-func (q *QueryParser) Run() (*Program, error) {
+func (q *QueryParser) Run(text string) (*Program, error) {
+	q.tokenizer = querytokenizer.New(querytokenizer.Props{Text: text})
 	token, err := q.tokenizer.GetNextToken()
 	if err != nil {
 		return nil, err

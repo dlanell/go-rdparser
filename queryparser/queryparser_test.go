@@ -5,17 +5,16 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/dlanell/go-rdparser/queryparser/querytokenizer"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestNew(t *testing.T) {
 	assertion := assert.New(t)
 	t.Run("given New with Props, return new QueryParser", func(t *testing.T) {
-		parser := New(Props{Text: "hello"})
+		parser := New()
 		assertion.Equal(&QueryParser{
-			text:      "hello",
-			tokenizer: querytokenizer.New(querytokenizer.Props{Text: "hello"}),
+			tokenizer: nil,
+			lookAhead: nil,
 		}, parser)
 	})
 }
@@ -50,8 +49,8 @@ func TestRun(t *testing.T) {
 
 			for name, tc := range tests {
 				t.Run(name, func(t *testing.T) {
-					parser := New(Props{Text: tc.text})
-					node, err := parser.Run()
+					parser := New()
+					node, err := parser.Run(tc.text)
 					assert.Equal(t, tc.expectedProgram, node)
 					assert.Equal(t, tc.expectedError, err)
 				})
@@ -65,7 +64,7 @@ func TestRun(t *testing.T) {
 						NodeType: ProgramEnum,
 						Body: &Node{
 							NodeType: BooleanLiteral,
-							Body: &BooleanLiteralValue{true},
+							Body:     &BooleanLiteralValue{true},
 						},
 					},
 				},
@@ -75,7 +74,7 @@ func TestRun(t *testing.T) {
 						NodeType: ProgramEnum,
 						Body: &Node{
 							NodeType: BooleanLiteral,
-							Body: &BooleanLiteralValue{false},
+							Body:     &BooleanLiteralValue{false},
 						},
 					},
 				},
@@ -83,8 +82,8 @@ func TestRun(t *testing.T) {
 
 			for name, tc := range tests {
 				t.Run(name, func(t *testing.T) {
-					parser := New(Props{Text: tc.text})
-					node, err := parser.Run()
+					parser := New()
+					node, err := parser.Run(tc.text)
 					assert.Equal(t, tc.expectedProgram, node)
 					assert.Equal(t, tc.expectedError, err)
 				})
@@ -136,8 +135,8 @@ func TestRun(t *testing.T) {
 
 			for name, tc := range tests {
 				t.Run(name, func(t *testing.T) {
-					parser := New(Props{Text: tc.text})
-					node, err := parser.Run()
+					parser := New()
+					node, err := parser.Run(tc.text)
 					assert.Equal(t, tc.expectedProgram, node)
 					assert.Equal(t, tc.expectedError, err)
 				})
@@ -310,8 +309,8 @@ func TestRun(t *testing.T) {
 
 				for name, tc := range tests {
 					t.Run(name, func(t *testing.T) {
-						parser := New(Props{Text: tc.text})
-						node, err := parser.Run()
+						parser := New()
+						node, err := parser.Run(tc.text)
 						assert.Equal(t, tc.expectedProgram, node)
 						assert.Equal(t, tc.expectedError, err)
 					})
@@ -475,8 +474,8 @@ func TestRun(t *testing.T) {
 
 				for name, tc := range tests {
 					t.Run(name, func(t *testing.T) {
-						parser := New(Props{Text: tc.text})
-						node, err := parser.Run()
+						parser := New()
+						node, err := parser.Run(tc.text)
 						assert.Equal(t, tc.expectedProgram, node)
 						assert.Equal(t, tc.expectedError, err)
 					})
@@ -633,8 +632,8 @@ func TestRun(t *testing.T) {
 
 			for name, tc := range tests {
 				t.Run(name, func(t *testing.T) {
-					parser := New(Props{Text: tc.text})
-					node, err := parser.Run()
+					parser := New()
+					node, err := parser.Run(tc.text)
 					assert.Equal(t, tc.expectedProgram, node)
 					assert.Equal(t, tc.expectedError, err)
 				})
