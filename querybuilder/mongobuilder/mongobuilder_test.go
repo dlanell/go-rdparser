@@ -2,6 +2,7 @@ package mongobuilder
 
 import (
 	"testing"
+	"time"
 
 	"github.com/dlanell/go-rdparser/queryparser"
 	"github.com/stretchr/testify/assert"
@@ -19,6 +20,9 @@ func TestRun(t *testing.T) {
 		"title",
 		"email",
 	}
+	// TODO: use the value here for tests. other thoughts on organizing this?
+	utcTime, _ := time.Parse(time.RFC3339, "2020-04-03T00:00:00Z")
+
 	t.Run("Relation Functions", func(t *testing.T) {
 		tests := map[string]test{
 			`given eq(policyId, "someId")`: {
@@ -189,6 +193,17 @@ func TestRun(t *testing.T) {
 						bson.A{
 							bson.D{{"title", 10}},
 							bson.D{{"email", 10}},
+						},
+					},
+				},
+			},
+			`given "2020-04-03T00:00:00Z"`: {
+				filterParam: `2020-04-03T00:00:00Z`,
+				expectedQuery: bson.D{
+					{"$or",
+						bson.A{
+							bson.D{{"title", utcTime}},
+							bson.D{{"email", utcTime}},
 						},
 					},
 				},

@@ -56,6 +56,35 @@ func TestRun(t *testing.T) {
 				})
 			}
 		})
+		t.Run("Date Literals", func(t *testing.T) {
+			tests := map[string]test{
+				"given numbers": {
+					text: `2020-04-03T08:58:26Z`,
+					expectedProgram: &Program{
+						NodeType: ProgramEnum,
+						Body: &Node{
+							NodeType: DateLiteral,
+							Body: &StringLiteralValue{
+								Value: "2020-04-03T08:58:26Z",
+							},
+						},
+					},
+				},
+				"given invalid characters": {
+					text:          `+`,
+					expectedError: fmt.Errorf("unexpected token: %s", `+`),
+				},
+			}
+
+			for name, tc := range tests {
+				t.Run(name, func(t *testing.T) {
+					parser := New()
+					node, err := parser.Run(tc.text)
+					assert.Equal(t, tc.expectedProgram, node)
+					assert.Equal(t, tc.expectedError, err)
+				})
+			}
+		})
 		t.Run("Boolean Literals", func(t *testing.T) {
 			tests := map[string]test{
 				"given true": {

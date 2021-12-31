@@ -1,6 +1,8 @@
 package mongobuilder
 
 import (
+	"time"
+
 	"github.com/dlanell/go-rdparser/queryparser"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -47,6 +49,8 @@ func (m *MongoBuilder) parseNode(node *queryparser.Node) bson.D {
 	case queryparser.StringLiteral:
 		return m.parseLiteralNode(node)
 	case queryparser.NumericLiteral:
+		return m.parseLiteralNode(node)
+	case queryparser.DateLiteral:
 		return m.parseLiteralNode(node)
 	case queryparser.BooleanLiteral:
 		return m.parseLiteralNode(node)
@@ -104,7 +108,11 @@ func (m *MongoBuilder) getLiteralNodeValue(node *queryparser.Node) interface{} {
 		return node.Body.(*queryparser.NumericLiteralValue).Value
 	case queryparser.Identifier:
 		return node.Body.(*queryparser.StringLiteralValue).Value
+	case queryparser.DateLiteral:
+		utcTime, _ := time.Parse(time.RFC3339, node.Body.(*queryparser.StringLiteralValue).Value)
+		return utcTime
 	default:
 		return node.Body.(*queryparser.StringLiteralValue).Value
 	}
+
 }

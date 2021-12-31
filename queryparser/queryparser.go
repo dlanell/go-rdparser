@@ -38,13 +38,16 @@ Identifier
 	: IDENTIFIER
 
 Literal
-	: NumericLiteral | StringLiteral | BooleanLiteral
+	: NumericLiteral | StringLiteral | DateLiteral | BooleanLiteral
 
 NumericLiteral
 	: NUMBER
 
 StringLiteral
 	: STRING
+
+DateLiteral
+	: DATE
 
 BooleanLiteral
 	: true | false
@@ -92,6 +95,7 @@ const (
 	Identifier                = "Identifier"
 	NumericLiteral            = "NumericLiteral"
 	StringLiteral             = "StringLiteral"
+	DateLiteral               = "DateLiteral"
 	BooleanLiteral            = "BooleanLiteral"
 	LogicalFunction           = "LogicalFunction"
 	RelationalFunction        = "RelationalFunction"
@@ -292,7 +296,7 @@ func (q *QueryParser) Arguments() ([]*Node, error) {
 }
 
 // Literal
-//	: NumericLiteral | StringLiteral | BooleanLiteral
+//	: NumericLiteral | StringLiteral | DateLiteral | BooleanLiteral
 //	;
 ///*
 func (q *QueryParser) Literal() (*Node, error) {
@@ -303,6 +307,8 @@ func (q *QueryParser) Literal() (*Node, error) {
 		return q.NumericLiteral()
 	case querytokenizer.StringToken:
 		return q.StringLiteral()
+	case querytokenizer.DateToken:
+		return q.DateLiteral()
 	}
 	return nil, fmt.Errorf("unexpected token: %s\n", q.lookAhead.TokenType)
 }
@@ -334,6 +340,18 @@ func (q *QueryParser) StringLiteral() (*Node, error) {
 	}
 
 	return &Node{NodeType: StringLiteral, Body: &StringLiteralValue{token.Value[1 : len(token.Value)-1]}}, nil
+}
+
+// DateLiteral
+//	: DATE
+///*
+func (q *QueryParser) DateLiteral() (*Node, error) {
+	token, tokenErr := q.eat(querytokenizer.DateToken)
+	if tokenErr != nil {
+		return nil, tokenErr
+	}
+
+	return &Node{NodeType: DateLiteral, Body: &StringLiteralValue{token.Value}}, nil
 }
 
 // BooleanLiteral

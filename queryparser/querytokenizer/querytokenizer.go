@@ -24,6 +24,7 @@ const (
 	NumberToken        string = "NUMBER"
 	StringToken               = "STRING"
 	BooleanToken              = "BOOLEAN"
+	DateToken                 = "DATE"
 	OpenParentheses           = "("
 	CloseParentheses          = ")"
 	Comma                     = ","
@@ -61,6 +62,12 @@ var spec = [][]string{
 	{`^\(`, OpenParentheses},
 	{`^\)`, CloseParentheses},
 	{`^\,`, Comma},
+
+	//---------------------------------------------------
+	// Dates
+	// example: 2020-04-03T08:58:26Z
+
+	{`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z`, DateToken},
 
 	//---------------------------------------------------
 	// Numbers

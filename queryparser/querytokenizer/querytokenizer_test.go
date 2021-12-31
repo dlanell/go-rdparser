@@ -97,6 +97,26 @@ func TestGetNextToken(t *testing.T) {
 			})
 		}
 	})
+	t.Run("DateToken", func(t *testing.T) {
+		tests := map[string]test{
+			"given date token": {
+				tokenizerText: `2020-04-03T08:58:26Z`,
+				expectedToken: &Token{
+					TokenType: DateToken,
+					Value:     `2020-04-03T08:58:26Z`,
+				},
+			},
+		}
+
+		for name, tc := range tests {
+			t.Run(name, func(t *testing.T) {
+				tokenizer := New(Props{Text: tc.tokenizerText})
+				token, err := tokenizer.GetNextToken()
+				assert.Equal(t, tc.expectedToken, token)
+				assert.Equal(t, tc.expectedError, err)
+			})
+		}
+	})
 	t.Run("BooleanToken", func(t *testing.T) {
 		tests := map[string]test{
 			"given empty string": {
