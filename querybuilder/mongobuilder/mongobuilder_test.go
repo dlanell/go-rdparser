@@ -4,7 +4,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dlanell/go-rdparser/queryparser"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -77,13 +76,11 @@ func TestRun(t *testing.T) {
 
 		for name, tc := range tests {
 			t.Run(name, func(t *testing.T) {
-				parser := queryparser.New()
 				queryBuilder := New(Props{literalComparisonFields})
-				tree, _ := parser.Run(tc.filterParam)
-
-				query := queryBuilder.Run(tree)
+				query, err := queryBuilder.Run(tc.filterParam)
 
 				assert.Equal(t, tc.expectedQuery, query)
+				assert.NoError(t, tc.expectedError, err)
 			})
 		}
 	})
@@ -163,13 +160,11 @@ func TestRun(t *testing.T) {
 
 		for name, tc := range tests {
 			t.Run(name, func(t *testing.T) {
-				parser := queryparser.New()
 				queryBuilder := New(Props{literalComparisonFields})
-				tree, _ := parser.Run(tc.filterParam)
-
-				query := queryBuilder.Run(tree)
+				query, err := queryBuilder.Run(tc.filterParam)
 
 				assert.Equal(t, tc.expectedQuery, query)
+				assert.NoError(t, tc.expectedError, err)
 			})
 		}
 	})
@@ -269,13 +264,11 @@ func TestRun(t *testing.T) {
 
 		for name, tc := range tests {
 			t.Run(name, func(t *testing.T) {
-				parser := queryparser.New()
 				queryBuilder := New(Props{literalComparisonFields})
-				tree, _ := parser.Run(tc.filterParam)
-
-				query := queryBuilder.Run(tree)
+				query, err := queryBuilder.Run(tc.filterParam)
 
 				assert.Equal(t, tc.expectedQuery, query)
+				assert.NoError(t, tc.expectedError, err)
 			})
 		}
 	})

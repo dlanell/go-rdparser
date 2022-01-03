@@ -178,7 +178,7 @@ func (q *QueryParser) Function() (*Node, error) {
 }
 
 // RelationalFunction
-//	: RelationalOperator '(' Identifier, Literal ')'
+//	: RelationalOperator '(' Identifier ',' Literal ')'
 //	;
 ///*
 func (q *QueryParser) RelationalFunction() (*Node, error) {

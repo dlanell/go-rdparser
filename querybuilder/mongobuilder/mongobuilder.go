@@ -7,9 +7,10 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-type MongoBuilder struct {
+type MongoFilterBuilder struct {
 	literalComparisonFields []string
 	parseTree *queryparser.Node
+	parser *queryparser.QueryParser
 }
 
 type Props struct {
@@ -17,32 +18,34 @@ type Props struct {
 }
 
 var OperatorMap = map[string]string {
-	queryparser.NotEqualOperator: "$ne",
-	queryparser.GreaterThanOperator: "$gt",
+	queryparser.NotEqualOperator:           "$ne",
+	queryparser.GreaterThanOperator:        "$gt",
 	queryparser.GreaterThanOrEqualOperator: "$gte",
-	queryparser.LessThanOperator: "$lt",
-	queryparser.LessThanOrEqualOperator: "$lte",
-	queryparser.LogicalOrOperator: "$or",
-	queryparser.LogicalAndOperator: "$and",
+	queryparser.LessThanOperator:           "$lt",
+	queryparser.LessThanOrEqualOperator:    "$lte",
+	queryparser.LogicalOrOperator:          "$or",
+	queryparser.LogicalAndOperator:         "$and",
 }
 
-func New(props Props) *MongoBuilder {
-	return &MongoBuilder{
+func New(props Props) *MongoFilterBuilder {
+	return &MongoFilterBuilder{
 		literalComparisonFields: props.LiteralComparisonFields,
+		parser: queryparser.New(),
 		parseTree:      nil,
 	}
 }
 
-func (m *MongoBuilder) Run(tree *queryparser.Program) bson.D {
-	if tree == nil {
-		return nil
+func (m *MongoFilterBuilder) Run(text string) (bson.D,error) {
+	tree, err := m.parser.Run(text)
+	if err != nil {
+		return nil, err
 	}
-	m.parseTree = tree.Body
 
-	return m.parseNode(m.parseTree)
+	m.parseTree = tree.Body
+	return m.parseNode(m.parseTree), nil
 }
 
-func (m *MongoBuilder) parseNode(node *queryparser.Node) bson.D {
+func (m *MongoFilterBuilder) parseNode(node *queryparser.Node) bson.D {
 	switch node.NodeType {
 	case queryparser.RelationalFunction:
 		return m.parseRelationalFunctionNode(node.Body.(*queryparser.FunctionNode))
@@ -59,7 +62,7 @@ func (m *MongoBuilder) parseNode(node *queryparser.Node) bson.D {
 	}
 }
 
-func (m *MongoBuilder) parseLiteralNode(node *queryparser.Node) bson.D {
+func (m *MongoFilterBuilder) parseLiteralNode(node *queryparser.Node) bson.D {
 	fieldComparisons := bson.A{}
 	for _, field := range m.literalComparisonFields {
 		fieldComparisons = append(fieldComparisons, bson.D{{field, m.getLiteralNodeValue(node)}})
@@ -67,7 +70,7 @@ func (m *MongoBuilder) parseLiteralNode(node *queryparser.Node) bson.D {
 	return bson.D{{"$or", fieldComparisons}}
 }
 
-func (m *MongoBuilder) parseLogicalFunctionNode(node *queryparser.FunctionNode) bson.D {
+func (m *MongoFilterBuilder) parseLogicalFunctionNode(node *queryparser.FunctionNode) bson.D {
 	argumentNodes := node.Arguments
 	arguments := bson.A{}
 	for _, argumentNode := range argumentNodes {
@@ -77,14 +80,14 @@ func (m *MongoBuilder) parseLogicalFunctionNode(node *queryparser.FunctionNode) 
 	return bson.D{{OperatorMap[node.Operator], arguments}}
 }
 
-func (m *MongoBuilder) parseRelationalFunctionNode(node *queryparser.FunctionNode) bson.D {
+func (m *MongoFilterBuilder) parseRelationalFunctionNode(node *queryparser.FunctionNode) bson.D {
 	if node.Operator == queryparser.EqualOperator {
 		return m.equalRelationalFunction(node)
 	}
 	return m.nonEqualRelationalFunction(node)
 }
 
-func (m *MongoBuilder) equalRelationalFunction(node *queryparser.FunctionNode) bson.D  {
+func (m *MongoFilterBuilder) equalRelationalFunction(node *queryparser.FunctionNode) bson.D  {
 	arguments := node.Arguments
 	identifier := m.getLiteralNodeValue(arguments[0]).(string)
 	literal := m.getLiteralNodeValue(arguments[1])
@@ -92,7 +95,7 @@ func (m *MongoBuilder) equalRelationalFunction(node *queryparser.FunctionNode) b
 	return bson.D{{identifier, literal}}
 }
 
-func (m *MongoBuilder) nonEqualRelationalFunction(node *queryparser.FunctionNode) bson.D {
+func (m *MongoFilterBuilder) nonEqualRelationalFunction(node *queryparser.FunctionNode) bson.D {
 	arguments := node.Arguments
 	identifier := m.getLiteralNodeValue(arguments[0]).(string)
 	literal := m.getLiteralNodeValue(arguments[1])
@@ -100,7 +103,7 @@ func (m *MongoBuilder) nonEqualRelationalFunction(node *queryparser.FunctionNode
 	return bson.D{{identifier, bson.D{{OperatorMap[node.Operator], literal}}}}
 }
 
-func (m *MongoBuilder) getLiteralNodeValue(node *queryparser.Node) interface{} {
+func (m *MongoFilterBuilder) getLiteralNodeValue(node *queryparser.Node) interface{} {
 	switch node.NodeType {
 	case queryparser.BooleanLiteral:
 		return node.Body.(*queryparser.BooleanLiteralValue).Value
